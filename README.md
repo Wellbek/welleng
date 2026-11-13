@@ -7,7 +7,7 @@ It installs from a single Git repository, keeps the editor, multiplexer, Git too
 ## Status
 
 **Pre-implementation.**
-The repository currently holds the foundations: repository hygiene, secret scanning, CI, decision records, the security and platform policies, and the agent instructions for working on the project.
+The repository currently holds the foundations: repository hygiene, secret scanning, CI, decision records, the security and platform policies, the agent instructions for working on the project, the credentials example with its on-demand loader, and the list of `ecc` plugin features that are disabled to avoid conflicts.
 No part of the environment itself is installed or implemented yet.
 
 [CHECKLIST.md](CHECKLIST.md) is the single source of truth for what exists and what has been verified, per platform.
@@ -221,6 +221,10 @@ Details and the threat summary are in [docs/security.md](docs/security.md).
 
 Covered in [Security](#security) and [docs/security.md](docs/security.md).
 
+- `scripts/init-secrets.sh` creates the credentials file from an example with mode 600.
+- A zsh helper reads one named secret on demand by parsing the file, never sourcing it, and passes it only to the process that needs it.
+- The `glm` function is built on that helper, so no key lives in a shell startup file.
+
 ### Continuous integration
 
 Every push and pull request runs:
@@ -257,6 +261,9 @@ Existing today:
 .claude/settings.json         project permission baseline
 scripts/check-hygiene.sh      hygiene checks shared by the hook and CI
 scripts/scan-secrets-fallback.sh
+scripts/init-secrets.sh       create the credentials file with mode 600 and show what is set
+scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code settings
+home/dot_config/welleng/      credentials example, zsh helpers, ecc override list
 CLAUDE.md                     agent instructions for this repository
 CHECKLIST.md                  verification status per feature and platform
 docs/adr/                     architecture decision records
@@ -269,7 +276,7 @@ Planned, not created yet:
 ```
 bootstrap/                    install.sh, install.ps1, uninstall scripts
 packages/packages.toml        logical package name to package id per platform
-home/                         chezmoi source state
+home/                         the rest of the chezmoi source state, plus .chezmoiroot
 claude-plugin/                the welleng Claude Code plugin
 tools/                        the welleng Python package and its tests
 ```
@@ -318,6 +325,21 @@ scripts/check-hygiene.sh              # run the hygiene checks
 
 Install `gitleaks` for full secret-scan coverage in the hook.
 Without it, the hook falls back to a shorter built-in scan and prints a warning.
+
+Set up credentials, which are all optional:
+
+```sh
+scripts/init-secrets.sh            # creates ~/.config/welleng/secrets.env with mode 600
+scripts/init-secrets.sh --status   # shows which variables are set, never their values
+```
+
+Nothing is required.
+Claude Code signs in with `claude` then `/login`, and GitHub with `gh auth login`.
+Optional variables are `ZAI_API_KEY` for the `glm` shell function, `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` for editor providers that use API keys.
+The full instructions are in [docs/security.md](docs/security.md#setting-up-credentials).
+
+If you use the `ecc` Claude Code plugin, run `python3 scripts/apply-ecc-overrides.py --dry-run` to preview which of its features are disabled because they conflict with this project, then run it without `--dry-run` to apply them.
+The reasons are in [ADR 0011](docs/adr/0011-avoid-overlap-with-the-ecc-plugin.md).
 
 The planned fresh-machine flow, none of which exists yet:
 

@@ -46,11 +46,12 @@ Read `README.md` for the architecture and `docs/adr/` for the reasons behind eac
 Existing today:
 
 - `docs/adr/` decision records, `docs/security.md`, `docs/platforms.md`
-- `scripts/` repository hygiene and secret scanning
+- `scripts/` repository hygiene, secret scanning, `init-secrets.sh` and `apply-ecc-overrides.py`
 - `.githooks/` pre-commit gate
+- `home/dot_config/welleng/` credentials example, zsh helpers and the `ecc` override list, the first part of the chezmoi source state
 
 Planned, not created yet:
 
-- `home/` chezmoi source state, `bootstrap/` installers, `packages/` package map
+- the rest of `home/` and `.chezmoiroot`, `bootstrap/` installers, `packages/` package map
 - `claude-plugin/` the Claude Code plugin with the `/harness` skill and hooks
 - `tools/` the `welleng` Python package
