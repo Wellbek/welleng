@@ -21,19 +21,19 @@ Anything that needs a device or an operating system that has not been reached is
 | Pre-commit secret scan, `gitleaks` path | implemented | - | `gitleaks` is not installed on the Arch machine, the hook branch itself has not run locally |
 | Hygiene script: tracked secrets files and em dashes | tested | Arch, CI (ubuntu-latest) | Checks text content only |
 | CI: secret scan, hygiene, ShellCheck | tested | GitHub Actions, ubuntu-latest | No Windows or container-matrix job yet |
-| Architecture decision records 0001 to 0011 | implemented | - | 0011 details wait for the plugin overlap spike |
+| Architecture decision records 0001 to 0012 | implemented | - | Claims carry evidence tags, see the ADR index |
 | `docs/security.md` and `docs/platforms.md` | implemented | - | Design rules and upstream claims, not yet verified on a real setup |
 | Project agent instructions and permission baseline | implemented | - | The deny rules have not been exercised yet |
 | Credentials example, on-demand loader, `glm` function and `scripts/init-secrets.sh` | tested | Arch: file created with mode 600, never overwritten, parsed and not sourced, and `glm` run with a stub `claude` and a fake key | The real `glm` against the provider has not been run, it needs a new key |
 | Plaintext credentials removed from the shell startup file and the editor config | tested | Arch, the count of key-like strings is zero in both files | Revoked keys can remain in editor local history and in Claude Code's own history file, outside this repository |
 | Read-only snapshot of the existing configuration | tested | Arch: 122 files copied to a mode-700 directory outside any repository, three files compared identical | The snapshot predates the credential removal and still holds the revoked keys, delete it when it is no longer needed |
 | Spike 1: chezmoi with `.chezmoiroot` and symlinked directories | tested | Arch, chezmoi v2.74.1, throwaway repository and fake home, see ADR 0002 | Windows symlinks, WSL detection and macOS are not verified |
-| Spike 2: claudecode.nvim with Claude in an external tmux pane | planned | - | |
-| Spike 3: hook input and output schemas, user-only messages | planned | - | |
+| Spike 2: claudecode.nvim with Claude in an external tmux pane | tested | Arch, Neovim 0.12.1, plugin commit `bcf1f08`, throwaway home: server, lock file, loopback-only listener and cleanup, see ADR 0010 | A real `claude --ide` connection and diff accept or reject are not yet verified |
+| Spike 3: hook input and output schemas, user-only messages | implemented | Read from the official hooks reference, see ADR 0012 | Documented behaviour only, no hook was run live, `TMUX_PANE` inheritance and `systemMessage` rendering are unverified |
 | Spike 4: overlap with the `ecc` plugin | tested | Arch, by reading the plugin source version 2.2.3, see ADR 0011 | Findings come from reading code, not from running every hook |
-| `ecc` override list and `scripts/apply-ecc-overrides.py` | tested | Arch: dry run, apply, idempotence and key preservation on a copy of the real settings, then applied to the real settings | Effect in a fresh session, and whether a skill deny rule also stops a typed slash command, are not yet verified |
-| Spike 5: Remote Control permission approval flow | planned | - | Security claims are documented upstream, see `docs/security.md` |
-| Spike 6: psmux viability on Windows | planned | - | |
+| `ecc` override list and `scripts/apply-ecc-overrides.py` | tested | Arch: dry run, apply, idempotence and key preservation on a copy of the real settings, then applied to the real settings | The disabled GateGuard hook stopped gating in the running session without a restart `[verified: Arch]`. Whether a skill deny rule also stops a typed slash command is not yet verified, see ADR 0011 |
+| Spike 5: Remote Control permission approval flow | implemented | Read from the official documentation, see `docs/security.md` | Approvals from a real phone are not verified, that stays a manual procedure |
+| Spike 6: psmux viability on Windows | planned | - | Cannot run on Linux, needs a Windows host or CI runner, the four checks are listed in ADR 0003 |
 
 ## Phase 1 - Core shell and terminal environment
 

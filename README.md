@@ -390,7 +390,7 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 - A literal "press Enter to skip" is impossible in Claude Code's input, because an empty prompt is ignored.
 - Remote Control cannot control sessions routed to another provider.
 - A terminal cannot match a graphical diff editor exactly.
-- Native Windows has no tmux, so it relies on a young third-party alternative and is best effort.
+- Native Windows has no tmux, so it relies on a third-party alternative, psmux, that has not been run for this project and is best effort.
 - Model recommendations cannot reliably classify task complexity from a prompt alone, so they stay silent when unsure.
 - The `gitleaks` branch of the local pre-commit hook has not been run locally, the same scanner is verified in CI.
 
