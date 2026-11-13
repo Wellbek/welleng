@@ -5,7 +5,7 @@ Date: 2026-11-13
 
 ## Context
 
-Agent monitoring, the project harness and model recommendations all depend on Claude Code hook events and the status line payload.
+Agent monitoring, the project harness and effort recommendations all depend on Claude Code hook events and the status line payload.
 Their schemas are not a frozen API, so the project needs one written record of exactly which events and fields it relies on, and where each guarantee comes from.
 
 This record was written from the official hooks reference, read on 2026-11-13 `[docs]`.
@@ -35,7 +35,7 @@ Output the project uses:
 | Output field | Effect | Used for |
 |---|---|---|
 | `hookSpecificOutput.additionalContext` | Added to the model context as a system reminder, capped at 10,000 characters | The `/harness` suggestion at `SessionStart` |
-| `systemMessage` | A warning shown to the user | An optional one-off model hint, see the consequences |
+| `systemMessage` | A warning shown to the user | An optional one-off effort hint, see the consequences |
 | Plain stdout on `UserPromptSubmit`, `SessionStart` and `PostModelSwitch` | Also added to the model context | Hooks must print nothing except the JSON object |
 
 ## Consequences
@@ -44,7 +44,8 @@ Findings that shape the design:
 
 - **The prompt hook cannot see the model.**
   Only `SessionStart`, and the model switch events, carry a model, and there is no `$CLAUDE_MODEL` variable.
-  The hint scorer therefore reads the current model from the session state file that the status line script and the `PostModelSwitch` hook keep up to date.
+  Hints are effort-only, see ADR 0013, so the scorer does not need the model: the effort level is in the common input.
+  The model is still shown on the dashboard, taken from the status line, and the `PostModelSwitch` hook is optional for that display.
 - **A hint can be user-only.**
   `systemMessage` is documented as shown to the user, while only `additionalContext` and plain stdout enter the model context.
   The status line segment stays the primary delivery, and `systemMessage` is an optional second channel.

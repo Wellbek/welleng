@@ -24,8 +24,9 @@ Claims in these records carry one of these tags so the strength of the evidence 
 | [0005](0005-official-claude-code-interfaces-only.md) | Official Claude Code interfaces only | Accepted |
 | [0006](0006-lazyvim-base-with-nvchad-fallback.md) | LazyVim base with an NvChad fallback | Accepted |
 | [0007](0007-openssh-config-as-machine-registry.md) | OpenSSH config as the machine registry | Accepted |
-| [0008](0008-recommend-only-model-hints.md) | Recommend-only model hints | Accepted |
+| [0008](0008-recommend-only-model-hints.md) | Recommend-only model hints | Superseded by 0013 |
 | [0009](0009-secrets-outside-the-repository.md) | Secrets live outside the repository | Accepted |
 | [0010](0010-claude-in-a-tmux-pane-with-an-editor-bridge.md) | Claude in a tmux pane with an editor bridge | Accepted |
 | [0011](0011-avoid-overlap-with-the-ecc-plugin.md) | Avoid overlap with the ecc plugin | Accepted |
 | [0012](0012-hook-event-data-contract.md) | Hook event data contract | Accepted |
+| [0013](0013-effort-only-hints.md) | Effort-only hints | Accepted |

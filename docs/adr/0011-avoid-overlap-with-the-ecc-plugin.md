@@ -7,7 +7,7 @@ Date: 2026-11-13
 
 The `ecc` Claude Code plugin is already installed on the maintainer's machine `[verified: Arch]`.
 It provides commands such as `/project-init`, `/model-route`, `configure-ecc` and `harness-audit`, a `token-budget-advisor` skill and a `GateGuard` hook that gates the first Bash and first file write of a session.
-Parts of that overlap with the harness, model-hint and monitoring work in this project.
+Parts of that overlap with the harness, effort-hint and monitoring work in this project.
 
 ## Options considered
 
@@ -39,7 +39,7 @@ In summary, 18 hooks and 18 commands and skills are disabled:
 | Harness overlap | `project-init`, `configure-ecc`, `harness-audit`, `agent-sort`, `workspace-surface-audit`, `config-gc`, the `hookify` family, and the global format, lint and typecheck hooks |
 | Monitoring and cost | the cost tracker hooks, the metrics bridge, the context monitor, the session activity tracker, `cost-tracking`, `cost-report`, `dmux-workflows` |
 | Safety and state | `auto-tmux-dev`, `command-log-audit` |
-| Model hints | `model-route` |
+| Hints | `model-route` |
 
 Kept, because they do not conflict:
 

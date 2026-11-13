@@ -1,6 +1,6 @@
 # 0008 - Recommend-only model hints
 
-Status: Accepted
+Status: Superseded by [0013](0013-effort-only-hints.md)
 Date: 2026-11-13
 
 ## Context
