@@ -28,3 +28,4 @@ Claims in these records carry one of these tags so the strength of the evidence 
 | [0009](0009-secrets-outside-the-repository.md) | Secrets live outside the repository | Accepted |
 | [0010](0010-claude-in-a-tmux-pane-with-an-editor-bridge.md) | Claude in a tmux pane with an editor bridge | Accepted |
 | [0011](0011-avoid-overlap-with-the-ecc-plugin.md) | Avoid overlap with the ecc plugin | Accepted |
+| [0012](0012-hook-event-data-contract.md) | Hook event data contract | Accepted |
