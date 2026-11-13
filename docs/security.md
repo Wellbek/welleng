@@ -89,8 +89,28 @@ Project defaults, which are design rules and not yet implemented:
 - Server mode uses `--spawn worktree` so parallel sessions do not share one working tree.
 - Sessions started from a phone use the permission mode `default`, which asks, and never a bypass mode.
 
+Approvals from a phone `[docs]`:
+
+- Permission prompts and questions stay open until you answer them, they do not time out.
+- A session can be started with `--permission-mode` in server mode, so the project default of `default` is enforceable and does not rely on a setting in each project.
+- A phone can change the model and the effort level of the running session, which the model hint feature treats as an ordinary switch.
+- Commands that only make sense in a terminal, such as `/plugin` and `/resume`, stay local-only.
+- Push notifications for permission prompts are optional and are enabled in `/config`.
+
 `[spike]` The "no inbound ports" claim is documented upstream, but it is not yet verified on a real machine.
 Acceptance test 9b will compare listening ports before and after enabling Remote Control.
+
+### The editor bridge is a local listener
+
+This is separate from Remote Control, and it does open a port.
+The claudecode.nvim bridge starts a WebSocket server inside Neovim `[verified: Arch]`.
+
+- It listens on `127.0.0.1` only, so it is not reachable from the network.
+- Connections must present the token from the lock file, which is `~/.claude/ide/<port>.lock` with mode 600 inside a directory with mode 700.
+- The lock file is removed when Neovim exits.
+- Any process running as the same user can read the lock file, so the bridge protects against other users and other machines, not against malware running as you.
+
+Acceptance test 9b therefore filters by process, so that the Neovim listener is not mistaken for a Remote Control listener.
 
 ### Optional: Tailscale, SSH and tmux
 
