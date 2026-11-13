@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Pre-commit gate: secret scan plus repository hygiene.
+# Enable once per clone with: git config core.hooksPath .githooks
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root"
+
+if command -v gitleaks >/dev/null 2>&1; then
+  if gitleaks git --help >/dev/null 2>&1; then
+    gitleaks git --staged --redact --no-banner --config .gitleaks.toml
+  else
+    gitleaks protect --staged --redact --no-banner --config .gitleaks.toml
+  fi
+else
+  echo "warning: gitleaks is not installed, running the built-in fallback scan." >&2
+  echo "         Install gitleaks for full coverage. CI always runs the real scanner." >&2
+  scripts/scan-secrets-fallback.sh
+fi
+
+scripts/check-hygiene.sh --staged

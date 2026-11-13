@@ -1,0 +1,13 @@
+title = "Well-Engineering gitleaks configuration"
+
+[extend]
+# Start from the upstream default ruleset and add only repo-specific allowances.
+useDefault = true
+
+[allowlist]
+description = "Documentation placeholders that are not real credentials"
+regexes = [
+  '''YOUR_[A-Z_]+_HERE''',
+  '''<redacted>''',
+  '''your-key-here''',
+]
