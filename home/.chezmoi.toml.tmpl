@@ -1,0 +1,9 @@
+{{- /* Per-machine data, asked once and remembered by chezmoi. */ -}}
+{{- /* Unattended runs pass the full prompt text, for example: */ -}}
+{{- /*   chezmoi init --promptString "Git author name=Ada" --promptString "Git author email=ada@example.org" */ -}}
+{{- $name := promptStringOnce . "name" "Git author name" -}}
+{{- $email := promptStringOnce . "email" "Git author email" -}}
+
+[data]
+  name = {{ $name | quote }}
+  email = {{ $email | quote }}
