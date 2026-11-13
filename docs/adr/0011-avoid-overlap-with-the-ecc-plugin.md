@@ -65,5 +65,8 @@ The project's own hooks stay few and fast, so they do not add the friction that 
 Not yet verified `[spike]`:
 
 - Whether a `Skill` deny rule also stops the user typing the slash command, or only model invocation.
-- That the disabled hook ids take effect in a fresh session.
-  The first session after applying the overrides confirms this, and the result belongs in `CHECKLIST.md`.
+  The hooks reference says typed slash commands bypass `PreToolUse` and are covered by a separate `UserPromptExpansion` event `[docs]`, which suggests a deny rule may not stop a typed command.
+  If it does not, a small `UserPromptExpansion` hook matching the disabled command names can block them, and it is added only if that turns out to matter.
+
+Verified: the disabled hook ids took effect in the running session without a restart.
+The first new file written after the overrides was applied was no longer blocked by the GateGuard hook `[verified: Arch]`.
