@@ -52,7 +52,7 @@ jobs:
             manager: dnf
           - distro: arch
             image: archlinux:latest
-            prepare: pacman -Sy --noconfirm python
+            prepare: pacman -Syu --noconfirm python
             manager: pacman
     container: ${{ matrix.image }}
     steps:
