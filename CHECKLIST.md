@@ -22,7 +22,7 @@ Anything that needs a device or an operating system that has not been reached is
 | `scripts/install-gitleaks.sh` pinned, checksum-verified install | tested | Arch: installs without root, and a corrupted archive is rejected with nothing installed | macOS and arm64 branches are written but not run |
 | Hygiene script: tracked secrets files and em dashes | tested | Arch, CI (ubuntu-latest) | Checks text content only |
 | CI: secret scan, hygiene, ShellCheck | tested | GitHub Actions, ubuntu-latest | No Windows job yet |
-| CI: package id check on Ubuntu 24.04, Fedora and Arch containers | implemented | - | Becomes tested after its first green run |
+| CI: package id check on Ubuntu 24.04, Fedora and Arch containers | tested | GitHub Actions, three container jobs, all green. The Arch job first failed on a partial upgrade and was fixed with a full `pacman -Syu` | Checks that ids exist, not that the packages install or that their versions are new enough |
 | Architecture decision records 0001 to 0012 | implemented | - | Claims carry evidence tags, see the ADR index |
 | `docs/security.md` and `docs/platforms.md` | implemented | - | Design rules and upstream claims, not yet verified on a real setup |
 | Project agent instructions and permission baseline | implemented | - | The deny rules have not been exercised yet |
