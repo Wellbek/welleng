@@ -1,0 +1,238 @@
+# Logical package name -> package id per package manager.
+#
+# tier:     mandatory | recommended | optional
+# <manager> the package id for that manager, a missing key means "not available there"
+# fallback  how to install it when the manager has no package, see the installer
+# note      anything a human needs to know
+#
+# Verification status of the ids, see CHECKLIST.md:
+#   pacman, apt, dnf   checked by scripts/check-packages.py inside containers
+#   brew, winget, scoop   written from knowledge of the upstream names, not yet checked
+
+[[package]]
+name = "git"
+tier = "mandatory"
+pacman = "git"
+apt = "git"
+dnf = "git"
+brew = "git"
+winget = "Git.Git"
+scoop = "git"
+
+[[package]]
+name = "chezmoi"
+tier = "mandatory"
+pacman = "chezmoi"
+dnf = "chezmoi"
+brew = "chezmoi"
+winget = "twpayne.chezmoi"
+scoop = "chezmoi"
+fallback = "https://get.chezmoi.io"
+
+[[package]]
+name = "uv"
+tier = "mandatory"
+pacman = "uv"
+dnf = "uv"
+brew = "uv"
+winget = "astral-sh.uv"
+scoop = "uv"
+fallback = "https://astral.sh/uv/install.sh"
+
+[[package]]
+name = "tmux"
+tier = "mandatory"
+pacman = "tmux"
+apt = "tmux"
+dnf = "tmux"
+brew = "tmux"
+note = "No native Windows build, see docs/platforms.md"
+
+[[package]]
+name = "bc"
+tier = "mandatory"
+pacman = "bc"
+apt = "bc"
+dnf = "bc"
+note = "Used by the vim-tmux-navigator version check in tmux.conf, macOS ships its own"
+
+[[package]]
+name = "zsh"
+tier = "mandatory"
+pacman = "zsh"
+apt = "zsh"
+dnf = "zsh"
+brew = "zsh"
+note = "Linux and WSL shell, PowerShell 7 is the Windows shell"
+
+[[package]]
+name = "neovim"
+tier = "mandatory"
+pacman = "neovim"
+apt = "neovim"
+dnf = "neovim"
+brew = "neovim"
+winget = "Neovim.Neovim"
+scoop = "neovim"
+note = "Ubuntu 24.04 ships 0.9.5 [verified in container], older than the 0.12 used on the maintainer's Arch machine, the installer must provide a newer release where the editor phase needs it"
+
+[[package]]
+name = "ripgrep"
+tier = "mandatory"
+pacman = "ripgrep"
+apt = "ripgrep"
+dnf = "ripgrep"
+brew = "ripgrep"
+winget = "BurntSushi.ripgrep.MSVC"
+scoop = "ripgrep"
+
+[[package]]
+name = "fd"
+tier = "mandatory"
+pacman = "fd"
+apt = "fd-find"
+dnf = "fd-find"
+brew = "fd"
+winget = "sharkdp.fd"
+scoop = "fd"
+note = "Debian and Ubuntu install the binary as fdfind"
+
+[[package]]
+name = "fzf"
+tier = "mandatory"
+pacman = "fzf"
+apt = "fzf"
+dnf = "fzf"
+brew = "fzf"
+winget = "junegunn.fzf"
+scoop = "fzf"
+
+[[package]]
+name = "bat"
+tier = "mandatory"
+pacman = "bat"
+apt = "bat"
+dnf = "bat"
+brew = "bat"
+winget = "sharkdp.bat"
+scoop = "bat"
+note = "Debian and Ubuntu install the binary as batcat"
+
+[[package]]
+name = "zoxide"
+tier = "mandatory"
+pacman = "zoxide"
+apt = "zoxide"
+dnf = "zoxide"
+brew = "zoxide"
+winget = "ajeetdsouza.zoxide"
+scoop = "zoxide"
+
+[[package]]
+name = "lazygit"
+tier = "mandatory"
+pacman = "lazygit"
+brew = "lazygit"
+winget = "JesseDuffield.lazygit"
+scoop = "lazygit"
+fallback = "https://github.com/jesseduffield/lazygit/releases"
+
+[[package]]
+name = "delta"
+tier = "mandatory"
+pacman = "git-delta"
+apt = "git-delta"
+dnf = "git-delta"
+brew = "git-delta"
+winget = "dandavison.delta"
+scoop = "delta"
+fallback = "https://github.com/dandavison/delta/releases"
+
+[[package]]
+name = "jq"
+tier = "mandatory"
+pacman = "jq"
+apt = "jq"
+dnf = "jq"
+brew = "jq"
+winget = "jqlang.jq"
+scoop = "jq"
+
+[[package]]
+name = "yazi"
+tier = "recommended"
+pacman = "yazi"
+brew = "yazi"
+winget = "sxyazi.yazi"
+scoop = "yazi"
+fallback = "https://github.com/sxyazi/yazi/releases"
+
+[[package]]
+name = "glow"
+tier = "recommended"
+pacman = "glow"
+dnf = "glow"
+brew = "glow"
+winget = "charmbracelet.glow"
+scoop = "glow"
+fallback = "https://github.com/charmbracelet/glow/releases"
+
+[[package]]
+name = "starship"
+tier = "recommended"
+pacman = "starship"
+brew = "starship"
+winget = "Starship.Starship"
+scoop = "starship"
+fallback = "https://starship.rs/install.sh"
+
+[[package]]
+name = "gitleaks"
+tier = "recommended"
+pacman = "gitleaks"
+brew = "gitleaks"
+fallback = "scripts/install-gitleaks.sh"
+note = "Prefer the pinned, checksum-verified script on every platform, Ubuntu 24.04 packages 8.16.0 [verified in container], older than the pinned version"
+
+[[package]]
+name = "tmuxp"
+tier = "recommended"
+pacman = "tmuxp"
+apt = "tmuxp"
+brew = "tmuxp"
+fallback = "uv tool install tmuxp"
+
+[[package]]
+name = "gh"
+tier = "recommended"
+pacman = "github-cli"
+apt = "gh"
+dnf = "gh"
+brew = "gh"
+winget = "GitHub.cli"
+scoop = "gh"
+
+[[package]]
+name = "kitty"
+tier = "optional"
+pacman = "kitty"
+apt = "kitty"
+dnf = "kitty"
+brew = "kitty"
+note = "Linux terminal emulator, a replaceable skin, see ADR 0003"
+
+[[package]]
+name = "wezterm"
+tier = "optional"
+pacman = "wezterm"
+brew = "wezterm"
+winget = "wez.wezterm"
+scoop = "wezterm"
+note = "Mandatory on native Windows and WSL2 hosts, the Windows emulator, see ADR 0003"
+
+[[package]]
+name = "psmux"
+tier = "optional"
+winget = "psmux"
+scoop = "psmux"
+note = "Native Windows tmux alternative, best effort, see ADR 0003"
