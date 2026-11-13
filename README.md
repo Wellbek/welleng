@@ -1,0 +1,377 @@
+# Well-Engineering
+
+A reproducible, terminal-centric and AI-native development environment for Linux, WSL2 and, as a best-effort fallback, native Windows.
+
+It installs from a single Git repository, keeps the editor, multiplexer, Git tooling and Claude Code working together, and adds only a small amount of custom code on top of mature tools.
+
+## Status
+
+**Pre-implementation.**
+The repository currently holds the foundations: repository hygiene, secret scanning, CI, decision records, the security and platform policies, and the agent instructions for working on the project.
+No part of the environment itself is installed or implemented yet.
+
+[CHECKLIST.md](CHECKLIST.md) is the single source of truth for what exists and what has been verified, per platform.
+Every feature described below is **planned** unless the checklist says otherwise.
+
+## Contents
+
+- [Design principles](#design-principles)
+- [Architecture](#architecture)
+- [Components](#components)
+- [The `welleng` command line](#the-welleng-command-line)
+- [Repository layout](#repository-layout)
+- [Platform support](#platform-support)
+- [Security](#security)
+- [Getting started](#getting-started)
+- [Roadmap](#roadmap)
+- [Documentation](#documentation)
+- [Conventions](#conventions)
+- [Known limitations](#known-limitations)
+- [License](#license)
+
+## Design principles
+
+- **The multiplexer owns the layout.**
+  tmux carries layout, keybindings and persistence, so the terminal emulator is a replaceable skin.
+- **Official interfaces only.**
+  Claude Code is integrated through its CLI JSON output, hooks, status line, settings and plugins, and never by parsing its internal files.
+- **Native formats stay the source of truth.**
+  SSH hosts live in `ssh_config`, project instructions in `CLAUDE.md` and `.claude/settings.json`, and tmux behaviour in `tmux.conf`.
+  Custom tools read and edit those formats instead of inventing a registry.
+- **Four kinds of state stay separate.**
+  Tracked configuration, local machine configuration, credentials and runtime state never share a location, see [Security](#security).
+- **Honest verification.**
+  Anything that has not been run on a platform is not claimed for that platform, and anything verified only on one machine is labelled with that machine.
+- **Few custom parts.**
+  Existing tools are configured first, glued second and written from scratch last.
+
+Evidence tags used across the documentation:
+
+| Tag | Meaning |
+|---|---|
+| `[verified: Arch]` | Checked directly on an Arch Linux machine, and only there |
+| `[docs]` | Checked against official documentation |
+| `[search]` | Seen in web search results only |
+| `[spike]` | Plausible but unverified, a spike must confirm it first |
+
+## Architecture
+
+```
+  Terminal emulator (skin only: kitty or WezTerm)
+            |
+  tmux session "welleng:<project>"   (layout from a tmuxp file)
+            |
+   +--------+----------+-------------+-----------+
+   | edit   | git      | agents      | shell     |
+   | nvim   | lazygit  | welleng     | zsh or    |
+   | claude |          | agents      | PowerShell|
+   +---+----+----------+------+------+-----------+
+       |                      |
+  claudecode.nvim        claude agents --json
+  (selection, @file,     plus hook and status line
+   diff review)          state files
+       |
+  Claude Code CLI  <---- hooks and status line ---->  welleng state
+       |
+  Remote Control (outbound only)  ->  phone
+```
+
+| Flow | Mechanism |
+|---|---|
+| Editor selection to Claude | claudecode.nvim local WebSocket bridge `[spike]` |
+| Claude events to the dashboard | Hooks write one small JSON file per session into the runtime state directory `[docs]` |
+| Model, effort and usage to the dashboard | The status line script reads the payload and writes the same file `[docs]` |
+| Session list and liveness | `claude agents --json` |
+| Jump from the dashboard to a session | The tmux pane id captured by the `SessionStart` hook, otherwise `claude attach` |
+| Model hints | The prompt hook writes an estimate, the status line shows it |
+| Phone control | Claude Code Remote Control `[docs]` |
+
+Remote machines need nothing from this project.
+`welleng ssh` only reads and writes the local SSH configuration.
+
+## Components
+
+### Installation and configuration
+
+**Tool:** chezmoi, see [ADR 0002](docs/adr/0002-chezmoi-for-install-and-config.md).
+
+- A bootstrap script installs `git`, `chezmoi` and `uv`, then runs `chezmoi init --apply`.
+- The source state lives under `home/` and is templated per operating system, WSL or native, and package manager.
+- Package installs are keyed on a hash of a single `packages/packages.toml` that maps one logical name to the package id on each platform.
+- Existing files are diffed first, and a conflicting file is backed up before it is replaced.
+- `--dry-run` prints the complete plan and changes nothing.
+- Directories that are edited live use symlinks into the repository, with a copy-mode fallback where symlinks are unavailable.
+- Uninstall restores files from the newest backup and removes only the symlinks it created.
+
+### Terminal and multiplexer
+
+**Tools:** tmux, kitty on Linux, WezTerm on Windows, tmuxp for layouts, see [ADR 0003](docs/adr/0003-tmux-as-multiplexer-terminal-as-skin.md).
+
+- The default layout has four windows: `edit` (Neovim, Claude and a shell), `git` (lazygit), `agents` (the dashboard) and `shell`.
+- `welleng up` computes a session name from the project root and loads the layout, and running it again attaches instead of creating a duplicate.
+- A per-project `.welleng/layout.yaml` can override the layout.
+- Native Windows uses psmux as a best-effort replacement for tmux `[spike]`.
+
+### Shell and command-line tools
+
+- zsh on Linux and WSL, PowerShell 7 on native Windows, with the same starship prompt in both.
+- Core tools: fzf, ripgrep, fd, bat, zoxide, yazi, glow, jq, delta and lazygit.
+- `welleng keys` generates the keybinding cheatsheet from tmux, Neovim and the shell, so nothing is maintained by hand.
+- The cheatsheet is available as a tmux popup and as a Neovim mapping.
+
+### Editor
+
+**Tool:** Neovim with LazyVim, see [ADR 0006](docs/adr/0006-lazyvim-base-with-nvchad-fallback.md).
+
+- Language servers, formatters and linters come from LazyVim extras and Mason.
+- Planned coverage: Python, C and C++, Rust, Go, Java, JavaScript and TypeScript, HTML and CSS, SQL, Bash, Lua, YAML, JSON and Markdown.
+- Personal keymaps and theme live in a `lua/user/` layer so they survive upgrades.
+- The previous configuration stays runnable through `NVIM_APPNAME` until the new one reaches parity.
+- Project-local overrides use Neovim's `exrc` and its trust prompt, so a repository cannot run code silently.
+
+### Git workflow
+
+| Tool | Role |
+|---|---|
+| lazygit | Overview, commit, branch, history and rebase, with hunk and line staging |
+| diffview.nvim | Side-by-side review where the working-tree side is an editable buffer `[spike]` |
+| gitsigns.nvim | Always-on hunk signs, stage, reset, preview and blame |
+| delta | Pager that gives green and red backgrounds in lazygit and in `git diff` |
+| `welleng repos` | Multi-repository overview, see below |
+
+No terminal tool reproduces every behaviour of a graphical diff editor, such as inline word-level highlighting and a "revert block" gutter.
+This combination is the closest available, and the gap is documented instead of hidden.
+
+### Claude Code integration
+
+**Decision:** Claude runs in a persistent tmux pane and the editor only provides a bridge, see [ADR 0010](docs/adr/0010-claude-in-a-tmux-pane-with-an-editor-bridge.md).
+
+- claudecode.nvim provides selection sharing, `@file` references and native diff review with accept and reject mappings.
+- A small set of contextual prompt keys covers explain, review, fix, write tests and refactor, each a thin wrapper around a canned prompt.
+- Subscription login is used only by the Claude Code CLI.
+  API-key providers sit in a separate editor module behind a single provider selector and read their keys from the secrets file.
+- A global `CLAUDE.md` is managed by chezmoi.
+
+### Project harness
+
+A Claude Code plugin ships a `/harness` skill that sets up a project's agent configuration through a short questionnaire.
+
+- It asks one question at a time, with a short explanation and examples, and accepts a skip token.
+  Claude Code ignores an empty prompt, so a literal "press Enter to skip" is not possible, and `-`, `skip` and `s` are accepted instead.
+- Free-form answers are rewritten into concise, imperative instructions using a rubric.
+- Before writing anything it shows a plan of changes with the exact files and a diff for each modification, and nothing is written until you approve.
+- Generated text lives in delimited blocks, so updates replace only managed blocks and never touch the rest of a file.
+- Each answer goes to the most deterministic mechanism that fits:
+
+| Intent | Mechanism |
+|---|---|
+| Always run the formatter after edits | A `PostToolUse` hook |
+| Never touch secrets files | `permissions.deny` plus a `PreToolUse` hook |
+| Run the tests before finishing | A `Stop` hook, or a documented command for slow suites |
+| Coding conventions | A `CLAUDE.md` block or a path-scoped rule file |
+| Ask before pushing or deleting | `permissions.ask` entries |
+| Query a database | An `.mcp.json` entry with credentials referenced by environment variable |
+| A personal preference | `settings.local.json` or the global configuration, never the team files |
+
+- `welleng harness check` validates the result: JSON validity, no empty files, no secrets, and executable hook commands.
+
+### Agent monitoring
+
+- `claude agents --json` is the base layer `[verified: Arch]`, observed on Claude Code 2.1.323.
+- Hooks and the status line enrich it with the model, effort, context usage, cost and plan usage windows `[docs]`.
+- `welleng agents` shows one row per session with project, state, model, effort, context, cost and age, and sorts sessions waiting for you to the top.
+- Enter jumps to the session's tmux pane, or attaches to a background session.
+  Terminating a session always asks for confirmation.
+- A tmux status segment shows how many sessions are waiting, in every tmux session.
+- Subagent counts come only from what hooks expose, and child-process trees are not shown because no official interface exists.
+- The adapter validates fields defensively, and a contract test runs against the real installed `claude` to catch schema drift.
+
+### Remote machine registry
+
+**Decision:** OpenSSH config is the registry, see [ADR 0007](docs/adr/0007-openssh-config-as-machine-registry.md).
+
+- `welleng ssh` lists hosts with tags and description and previews the effective settings from `ssh -G`.
+- `welleng ssh add`, `edit` and `rm` manage fragments under `~/.ssh/config.d/`, and hand-edited entries are never rewritten.
+- Hosts, addresses and usernames are local and never tracked in this repository.
+
+### Mobile access
+
+- **Default:** Claude Code Remote Control `[docs]`.
+  The session keeps running on your machine and the phone is a window into it.
+  It makes outbound connections only, and it requires a subscription login.
+- **Opt-in:** it is off by default and enabled per session.
+- **Optional:** Tailscale with SSH and tmux, for attaching to real panes from a phone SSH client.
+- **Rejected:** web terminals exposed through port forwarding or tunnels.
+- Remote Control does not work for sessions routed through another provider by overriding the API base URL `[docs]`.
+
+Details and the threat summary are in [docs/security.md](docs/security.md).
+
+### Model recommendations
+
+**Decision:** recommend only, never switch automatically, see [ADR 0008](docs/adr/0008-recommend-only-model-hints.md).
+
+- A local scorer in the prompt hook combines intent verbs, scope hints, session context, attachments and the previous turn.
+- A hint appears only when the estimate differs from the current model and effort by at least two steps, with enough confidence, right after a completed turn, outside any cooldown or snooze.
+- It is shown as a dim status line segment, and `hints snooze` and `hints off` silence it.
+- A model-based classification stage exists but is off by default, because it spends subscription usage.
+- Every recommendation is logged locally, and `hints report` shows how often hints fired and were accepted.
+- Expected accuracy is good for the obvious extremes and silent in the middle, by design.
+
+### Secrets and security
+
+Covered in [Security](#security) and [docs/security.md](docs/security.md).
+
+### Continuous integration
+
+Every push and pull request runs:
+
+- a full-history secret scan with a pinned, checksum-verified `gitleaks`
+- the repository hygiene script
+- Bash syntax checks and ShellCheck on all shell scripts
+
+## The `welleng` command line
+
+A small Python package run through `uv`, identical on Linux and Windows.
+All commands below are **planned**.
+
+| Command | Purpose |
+|---|---|
+| `welleng` or `welleng up [path]` | Open or attach to the project session, or pick a project when outside one |
+| `welleng repos [root]` | Multi-repository overview with branch, staged, unstaged and untracked counts, ahead and behind, and last commit |
+| `welleng agents` | Central view of Claude sessions, with `--count` for the tmux segment |
+| `welleng ssh [add\|edit\|rm\|ls]` | Pick and manage machines from the SSH config |
+| `welleng keys` | Generated, searchable keybinding cheatsheet |
+| `welleng doctor` | Report mandatory, recommended and optional components, failing only on missing mandatory ones |
+| `welleng harness check` | Validate generated project configuration |
+| `welleng hints [snooze\|off\|report]` | Control and review model recommendations |
+| `welleng rc` | Start Remote Control server mode in a dedicated tmux window |
+| `welleng update` | Pull, show the drift and the diff, then apply |
+
+## Repository layout
+
+Existing today:
+
+```
+.githooks/pre-commit          secret scan and hygiene gate
+.github/workflows/ci.yml      CI
+.claude/settings.json         project permission baseline
+scripts/check-hygiene.sh      hygiene checks shared by the hook and CI
+scripts/scan-secrets-fallback.sh
+CLAUDE.md                     agent instructions for this repository
+CHECKLIST.md                  verification status per feature and platform
+docs/adr/                     architecture decision records
+docs/security.md              secrets and remote access model
+docs/platforms.md             platform tiers and verification policy
+```
+
+Planned, not created yet:
+
+```
+bootstrap/                    install.sh, install.ps1, uninstall scripts
+packages/packages.toml        logical package name to package id per platform
+home/                         chezmoi source state
+claude-plugin/                the welleng Claude Code plugin
+tools/                        the welleng Python package and its tests
+```
+
+## Platform support
+
+| Tier | Platform | Policy |
+|---|---|---|
+| 1 | Linux (Arch, Ubuntu, Fedora) | Full support |
+| 1 | WSL2 | Full support, the first-class Windows path |
+| 2 | Native Windows | Best effort fallback |
+
+- Keep this repository and your configuration on the WSL ext4 filesystem, never under `/mnt/c`.
+- Enabling WSL2 can need administrator rights and a reboot, so a fresh Windows install is resumable and multi-step.
+- A claim is only made for a platform where it was run: "Tested on Arch", "Tested in container", "CI-verified bootstrap", and never "WSL2-verified" without a WSL2 run.
+
+The full capability matrix and verification rules are in [docs/platforms.md](docs/platforms.md).
+
+## Security
+
+- No credential is stored in this repository, in a shell startup file or in an editor config.
+- Credentials live in `~/.config/welleng/secrets.env` with mode 600, outside any repository.
+- A pre-commit hook and CI both scan for secrets.
+- Remote access is opt-in per session and never a standing internet-facing service.
+
+| State class | Location | Tracked |
+|---|---|---|
+| Tracked configuration | this repository | yes |
+| Local machine configuration | `~/.config/welleng/local.toml`, `~/.ssh/config.d/` | no |
+| Credentials | `~/.config/welleng/secrets.env`, `~/.ssh`, the OS keychain | never |
+| Runtime state | `$XDG_STATE_HOME/welleng`, on Windows `%LOCALAPPDATA%\welleng` | no |
+
+See [docs/security.md](docs/security.md) for the Remote Control model and what to do if a secret is committed.
+
+## Getting started
+
+The installer does not exist yet.
+What works today is contributing to the foundations.
+
+```sh
+git clone git@github.com:Wellbek/welleng.git
+cd welleng
+git config core.hooksPath .githooks   # enable the pre-commit gate
+scripts/check-hygiene.sh              # run the hygiene checks
+```
+
+Install `gitleaks` for full secret-scan coverage in the hook.
+Without it, the hook falls back to a shorter built-in scan and prints a warning.
+
+The planned fresh-machine flow, none of which exists yet:
+
+1. Install `git` and `curl`, or use `winget` on Windows.
+2. Run the bootstrap script, which installs `chezmoi` and `uv` and then applies the configuration.
+3. Run `welleng doctor` and follow its install hints.
+4. Sign in to Claude Code and GitHub, and add your own SSH hosts and secrets.
+
+## Roadmap
+
+| Phase | Theme |
+|---|---|
+| 0 | Baseline, safety, scaffolding and spikes |
+| 1 | Core shell and terminal environment, bootstrap, CI matrix |
+| 2 | Neovim with LazyVim |
+| 3 | Git workflow and the multi-repository overview |
+| 4 | Claude Code integration and the project harness |
+| 5 | Agent monitoring |
+| 6 | Remote machine registry |
+| 7 | Mobile access |
+| 8 | Model recommendations |
+| 9 | Windows and WSL2 hardening, uninstall, troubleshooting, final documentation |
+
+Each phase ends with tests on the stated platforms, updated documentation and an updated [CHECKLIST.md](CHECKLIST.md).
+
+## Documentation
+
+| Document | Contents |
+|---|---|
+| [CHECKLIST.md](CHECKLIST.md) | Feature status and the platform each was tested on |
+| [docs/adr/](docs/adr/README.md) | Architecture decision records and the evidence tags |
+| [docs/security.md](docs/security.md) | Credentials, scanning and remote access |
+| [docs/platforms.md](docs/platforms.md) | Tiers, capability matrix and verification rules |
+| [CLAUDE.md](CLAUDE.md) | Rules for agents working in this repository |
+
+## Conventions
+
+- Commits are small, one concern each, with Conventional Commits subjects such as `feat:`, `fix:`, `docs:`, `chore:` and `ci:`.
+- Significant decisions get a numbered record in `docs/adr/`, and a changed decision gets a new record that supersedes the old one.
+- Markdown is written with one full sentence per line.
+- The em dash character is not used, and `scripts/check-hygiene.sh` enforces it.
+- Shell scripts use `bash` with `set -euo pipefail`, are ShellCheck-clean and are idempotent.
+- Custom tooling is Python 3.11 or newer, run through `uv`.
+
+## Known limitations
+
+- Nothing in the environment itself is implemented yet.
+- A literal "press Enter to skip" is impossible in Claude Code's input, because an empty prompt is ignored.
+- Remote Control cannot control sessions routed to another provider.
+- A terminal cannot match a graphical diff editor exactly.
+- Native Windows has no tmux, so it relies on a young third-party alternative and is best effort.
+- Model recommendations cannot reliably classify task complexity from a prompt alone, so they stay silent when unsure.
+- The `gitleaks` branch of the local pre-commit hook has not been run locally, the same scanner is verified in CI.
+
+## License
+
+No license has been chosen yet, so all rights are reserved until one is added.
