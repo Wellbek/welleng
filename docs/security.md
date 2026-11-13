@@ -22,6 +22,38 @@ It is written before the features exist, so every statement about behaviour is a
 On Windows the secrets file is protected with an NTFS ACL instead of `chmod`.
 On WSL the file must be on the ext4 filesystem, because `chmod 600` has no effect under `/mnt/c`.
 
+## Setting up credentials
+
+Credentials are kept in one file, `~/.config/welleng/secrets.env`, with mode 600.
+The format is `NAME=value`, one per line, with no `export`, no spaces around `=` and no quotes needed.
+
+1. Run `scripts/init-secrets.sh`.
+   It creates the file from `home/dot_config/welleng/secrets.env.example` with mode 600, never overwrites an existing file, and lists which variables are set without printing values.
+2. Open the file and fill in only the variables you need.
+3. Run `scripts/init-secrets.sh --status` at any time to see what is set.
+
+| Variable | Needed | Used by |
+|---|---|---|
+| None | **Required** | Nothing in this project needs a credential file entry to work. Claude Code signs in with `claude` then `/login`, and GitHub with `gh auth login`, and neither stores anything here |
+| `ZAI_API_KEY` | Optional | The `glm` shell function, which runs Claude Code against z.ai GLM models. Sessions started this way cannot use Remote Control |
+| `ANTHROPIC_API_KEY` | Optional | Editor providers that use API keys, not Claude Code itself. Do not export it from shell startup files, it can take precedence over your subscription login |
+| `OPENAI_API_KEY` | Optional | Optional editor providers |
+
+How the values are read:
+
+- `home/dot_config/welleng/shell/welleng.zsh` provides the helpers.
+  Source it from `~/.zshrc` with `[[ -r ~/.config/welleng/shell/welleng.zsh ]] && source ~/.config/welleng/shell/welleng.zsh`.
+- The helper parses the file, it never sources it, so nothing in the file can execute.
+- A secret is read one name at a time, only when a command needs it, and is passed to that one process.
+  Nothing is exported into your interactive shell.
+- Set `WELLENG_SECRETS_FILE` to use a different location.
+
+Until the chezmoi bootstrap exists, link the helper into place by hand:
+`mkdir -p ~/.config/welleng/shell && ln -sfn "$PWD/home/dot_config/welleng/shell/welleng.zsh" ~/.config/welleng/shell/welleng.zsh`.
+
+If a key was ever stored in a shell startup file, an editor config or a command line, treat it as exposed, revoke it at the provider and create a new one.
+Also check places that keep copies, such as editor local history and shell or tool history files.
+
 ## Secret scanning
 
 - `.githooks/pre-commit` runs `gitleaks` on staged changes, using `.gitleaks.toml`.
