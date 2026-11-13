@@ -46,7 +46,7 @@ Read `README.md` for the architecture and `docs/adr/` for the reasons behind eac
 Existing today:
 
 - `docs/adr/` decision records, `docs/security.md`, `docs/platforms.md`
-- `scripts/` repository hygiene, secret scanning, `init-secrets.sh` and `apply-ecc-overrides.py`
+- `scripts/` repository hygiene, secret scanning, `install-gitleaks.sh`, `init-secrets.sh` and `apply-ecc-overrides.py`
 - `.githooks/` pre-commit gate
 - `home/dot_config/welleng/` credentials example, zsh helpers and the `ecc` override list, the first part of the chezmoi source state
 

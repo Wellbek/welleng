@@ -18,7 +18,8 @@ Anything that needs a device or an operating system that has not been reached is
 |---|---|---|---|
 | Repository scaffolding: `.gitignore`, `.gitattributes`, `.editorconfig` | tested | Arch, ignore rules checked with `git check-ignore` | Line-ending rules are not yet exercised on Windows |
 | Pre-commit secret scan, fallback path | tested | Arch, with synthetic fake secrets in a throwaway repository | Short pattern list, a safety net only |
-| Pre-commit secret scan, `gitleaks` path | implemented | - | `gitleaks` is not installed on the Arch machine, the hook branch itself has not run locally |
+| Pre-commit secret scan, `gitleaks` path | tested | Arch, gitleaks 8.30.1 in a throwaway repository: clean file passes, a fake token is blocked, the placeholder passes the allowlist | Only the Linux x64 build was run |
+| `scripts/install-gitleaks.sh` pinned, checksum-verified install | tested | Arch: installs without root, and a corrupted archive is rejected with nothing installed | macOS and arm64 branches are written but not run |
 | Hygiene script: tracked secrets files and em dashes | tested | Arch, CI (ubuntu-latest) | Checks text content only |
 | CI: secret scan, hygiene, ShellCheck | tested | GitHub Actions, ubuntu-latest | No Windows or container-matrix job yet |
 | Architecture decision records 0001 to 0012 | implemented | - | Claims carry evidence tags, see the ADR index |

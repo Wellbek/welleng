@@ -263,6 +263,7 @@ Existing today:
 .claude/settings.json         project permission baseline
 scripts/check-hygiene.sh      hygiene checks shared by the hook and CI
 scripts/scan-secrets-fallback.sh
+scripts/install-gitleaks.sh   pinned, checksum-verified gitleaks install without root
 scripts/init-secrets.sh       create the credentials file with mode 600 and show what is set
 scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code settings
 home/dot_config/welleng/      credentials example, zsh helpers, ecc override list
@@ -325,8 +326,9 @@ git config core.hooksPath .githooks   # enable the pre-commit gate
 scripts/check-hygiene.sh              # run the hygiene checks
 ```
 
-Install `gitleaks` for full secret-scan coverage in the hook.
-Without it, the hook falls back to a shorter built-in scan and prints a warning.
+Install `gitleaks` for full secret-scan coverage in the hook with `scripts/install-gitleaks.sh`.
+It installs a pinned, checksum-verified release into `~/.local/bin` without root, and CI uses the same script.
+Without `gitleaks`, the hook falls back to a shorter built-in scan and prints a warning.
 
 Set up credentials, which are all optional:
 
@@ -394,7 +396,6 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 - A terminal cannot match a graphical diff editor exactly.
 - Native Windows has no tmux, so it relies on a third-party alternative, psmux, that has not been run for this project and is best effort.
 - Effort recommendations cannot reliably classify task complexity from a prompt alone, so they stay silent when unsure.
-- The `gitleaks` branch of the local pre-commit hook has not been run locally, the same scanner is verified in CI.
 
 ## License
 

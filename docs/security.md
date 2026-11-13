@@ -57,6 +57,7 @@ Also check places that keep copies, such as editor local history and shell or to
 ## Secret scanning
 
 - `.githooks/pre-commit` runs `gitleaks` on staged changes, using `.gitleaks.toml`.
+- `scripts/install-gitleaks.sh` installs a pinned, checksum-verified release into `~/.local/bin` without root, and CI installs the same version with the same script.
 - When `gitleaks` is not installed, a built-in fallback scan of staged files runs instead, and it prints file names only so a secret is never echoed.
 - The fallback is a safety net with a short pattern list, it does not replace `gitleaks`.
 - CI runs the real scanner on every push and pull request.
