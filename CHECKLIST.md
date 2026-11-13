@@ -100,11 +100,12 @@ Anything that needs a device or an operating system that has not been reached is
 | Port-diff security check | planned | - | |
 | Manual phone verification procedure | planned | - | Needs a real device |
 
-## Phase 8 - Model recommendations
+## Phase 8 - Effort recommendations
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| Local scorer in the prompt hook | planned | - | Accurate for the extremes, silent in the middle by design |
+| Local scorer in the prompt hook, effort level only | planned | - | Accurate for the extremes, silent in the middle by design |
+| Check that `effort.level` is the effective level in a real session | planned | - | Matters on models that fall back from `xhigh` to `high` |
 | Status line delivery, cooldown, snooze and off switch | planned | - | |
 | Recommendation log and report | planned | - | |
 

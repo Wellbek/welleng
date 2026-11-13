@@ -10,7 +10,7 @@
     { "id": "post:bash:command-log-cost", "reason": "Duplicates cost tracking that the dashboard takes from the status line." },
     { "id": "stop:cost-tracker", "reason": "Duplicates cost tracking that the dashboard takes from the status line." },
     { "id": "post:ecc-metrics-bridge", "reason": "Duplicates status line metrics, owned by the welleng status line script." },
-    { "id": "post:ecc-context-monitor", "reason": "Injects cost and context warnings into the model context, which overlaps monitoring and model hints." },
+    { "id": "post:ecc-context-monitor", "reason": "Injects cost and context warnings into the model context, which overlaps monitoring and effort hints." },
     { "id": "post:session-activity-tracker", "reason": "Writes per-tool session metrics that overlap the welleng session state files." },
     { "id": "post:quality-gate", "reason": "Runs formatters and linters after every edit, duplicating the per-project hooks that /harness sets up." },
     { "id": "post:edit:format", "reason": "Global formatter hook, duplicates per-project hooks from /harness." },
@@ -35,7 +35,7 @@
     { "name": "delivery-gate", "reason": "Stop hook that blocks finishing until checks pass, duplicating the Stop hook mapping in /harness." },
     { "name": "gateguard", "reason": "Documentation and control for the disabled GateGuard hooks." },
     { "name": "safety-guard", "reason": "Intercepts dangerous commands, duplicating permissions.ask and permissions.deny from /harness." },
-    { "name": "model-route", "reason": "Duplicates the model recommendation feature, which is hook and status line based." },
+    { "name": "model-route", "reason": "Duplicates the effort recommendation feature, which is hook and status line based." },
     { "name": "cost-tracking", "reason": "Reads the cost tracker log, which is disabled, and duplicates dashboard cost columns." },
     { "name": "cost-report", "reason": "Reads the cost tracker log, which is disabled, and duplicates dashboard cost columns." },
     { "name": "dmux-workflows", "reason": "Multi-agent orchestration over tmux panes, which overlaps tmux layout ownership and the agents dashboard." }

@@ -93,7 +93,7 @@ Approvals from a phone `[docs]`:
 
 - Permission prompts and questions stay open until you answer them, they do not time out.
 - A session can be started with `--permission-mode` in server mode, so the project default of `default` is enforceable and does not rely on a setting in each project.
-- A phone can change the model and the effort level of the running session, which the model hint feature treats as an ordinary switch.
+- A phone can change the model and the effort level of the running session, which the effort hint feature treats as an ordinary change, so an accepted hint is recognised from either device.
 - Commands that only make sense in a terminal, such as `/plugin` and `/resume`, stay local-only.
 - Push notifications for permission prompts are optional and are enabled in `/config`.
 

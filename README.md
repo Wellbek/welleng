@@ -83,7 +83,7 @@ Evidence tags used across the documentation:
 | Model, effort and usage to the dashboard | The status line script reads the payload and writes the same file `[docs]` |
 | Session list and liveness | `claude agents --json` |
 | Jump from the dashboard to a session | The tmux pane id captured by the `SessionStart` hook, otherwise `claude attach` |
-| Model hints | The prompt hook writes an estimate, the status line shows it |
+| Effort hints | The prompt hook writes an estimate, the status line shows it |
 | Phone control | Claude Code Remote Control `[docs]` |
 
 Remote machines need nothing from this project.
@@ -206,13 +206,15 @@ A Claude Code plugin ships a `/harness` skill that sets up a project's agent con
 
 Details and the threat summary are in [docs/security.md](docs/security.md).
 
-### Model recommendations
+### Effort recommendations
 
-**Decision:** recommend only, never switch automatically, see [ADR 0008](docs/adr/0008-recommend-only-model-hints.md).
+**Decision:** recommend an effort level only, never a model, and never switch automatically, see [ADR 0013](docs/adr/0013-effort-only-hints.md).
 
 - A local scorer in the prompt hook combines intent verbs, scope hints, session context, attachments and the previous turn.
-- A hint appears only when the estimate differs from the current model and effort by at least two steps, with enough confidence, right after a completed turn, outside any cooldown or snooze.
-- It is shown as a dim status line segment, and `hints snooze` and `hints off` silence it.
+- It recommends `low`, `medium` or `high`, and leaves `xhigh` and `max` as your own deliberate choice.
+- A hint appears only when the recommendation differs from the current effort level by at least two steps, with enough confidence, right after a completed turn, outside any cooldown or snooze.
+- It stays silent when the prompt contains `ultrathink` or the current model has no effort setting.
+- It is shown as a dim status line segment such as `hint: /effort low`, and `hints snooze` and `hints off` silence it.
 - A model-based classification stage exists but is off by default, because it spends subscription usage.
 - Every recommendation is logged locally, and `hints report` shows how often hints fired and were accepted.
 - Expected accuracy is good for the obvious extremes and silent in the middle, by design.
@@ -247,7 +249,7 @@ All commands below are **planned**.
 | `welleng keys` | Generated, searchable keybinding cheatsheet |
 | `welleng doctor` | Report mandatory, recommended and optional components, failing only on missing mandatory ones |
 | `welleng harness check` | Validate generated project configuration |
-| `welleng hints [snooze\|off\|report]` | Control and review model recommendations |
+| `welleng hints [snooze\|off\|report]` | Control and review effort recommendations |
 | `welleng rc` | Start Remote Control server mode in a dedicated tmux window |
 | `welleng update` | Pull, show the drift and the diff, then apply |
 
@@ -360,7 +362,7 @@ The planned fresh-machine flow, none of which exists yet:
 | 5 | Agent monitoring |
 | 6 | Remote machine registry |
 | 7 | Mobile access |
-| 8 | Model recommendations |
+| 8 | Effort recommendations |
 | 9 | Windows and WSL2 hardening, uninstall, troubleshooting, final documentation |
 
 Each phase ends with tests on the stated platforms, updated documentation and an updated [CHECKLIST.md](CHECKLIST.md).
@@ -391,7 +393,7 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 - Remote Control cannot control sessions routed to another provider.
 - A terminal cannot match a graphical diff editor exactly.
 - Native Windows has no tmux, so it relies on a third-party alternative, psmux, that has not been run for this project and is best effort.
-- Model recommendations cannot reliably classify task complexity from a prompt alone, so they stay silent when unsure.
+- Effort recommendations cannot reliably classify task complexity from a prompt alone, so they stay silent when unsure.
 - The `gitleaks` branch of the local pre-commit hook has not been run locally, the same scanner is verified in CI.
 
 ## License
