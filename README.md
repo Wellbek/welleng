@@ -234,6 +234,7 @@ Every push and pull request runs:
 - a full-history secret scan with a pinned, checksum-verified `gitleaks`
 - the repository hygiene script
 - Bash syntax checks and ShellCheck on all shell scripts
+- a check that every package id in `packages/packages.toml` exists in the repositories of Ubuntu 24.04, Fedora and Arch
 
 ## The `welleng` command line
 
@@ -264,9 +265,12 @@ Existing today:
 scripts/check-hygiene.sh      hygiene checks shared by the hook and CI
 scripts/scan-secrets-fallback.sh
 scripts/install-gitleaks.sh   pinned, checksum-verified gitleaks install without root
+scripts/check-packages.py     check package ids against pacman, apt and dnf
 scripts/init-secrets.sh       create the credentials file with mode 600 and show what is set
 scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code settings
-home/dot_config/welleng/      credentials example, zsh helpers, ecc override list
+packages/packages.toml        logical package name to package id per platform
+.chezmoiroot                  points chezmoi at home/
+home/                         chezmoi source state: tmux and git config, tpm, welleng config
 CLAUDE.md                     agent instructions for this repository
 CHECKLIST.md                  verification status per feature and platform
 docs/adr/                     architecture decision records
@@ -278,8 +282,7 @@ Planned, not created yet:
 
 ```
 bootstrap/                    install.sh, install.ps1, uninstall scripts
-packages/packages.toml        logical package name to package id per platform
-home/                         the rest of the chezmoi source state, plus .chezmoiroot
+home/                         the rest of the chezmoi source state: zsh, starship, kitty, yazi, lazygit, Neovim
 claude-plugin/                the welleng Claude Code plugin
 tools/                        the welleng Python package and its tests
 ```

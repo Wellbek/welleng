@@ -21,7 +21,8 @@ Anything that needs a device or an operating system that has not been reached is
 | Pre-commit secret scan, `gitleaks` path | tested | Arch, gitleaks 8.30.1 in a throwaway repository: clean file passes, a fake token is blocked, the placeholder passes the allowlist | Only the Linux x64 build was run |
 | `scripts/install-gitleaks.sh` pinned, checksum-verified install | tested | Arch: installs without root, and a corrupted archive is rejected with nothing installed | macOS and arm64 branches are written but not run |
 | Hygiene script: tracked secrets files and em dashes | tested | Arch, CI (ubuntu-latest) | Checks text content only |
-| CI: secret scan, hygiene, ShellCheck | tested | GitHub Actions, ubuntu-latest | No Windows or container-matrix job yet |
+| CI: secret scan, hygiene, ShellCheck | tested | GitHub Actions, ubuntu-latest | No Windows job yet |
+| CI: package id check on Ubuntu 24.04, Fedora and Arch containers | implemented | - | Becomes tested after its first green run |
 | Architecture decision records 0001 to 0012 | implemented | - | Claims carry evidence tags, see the ADR index |
 | `docs/security.md` and `docs/platforms.md` | implemented | - | Design rules and upstream claims, not yet verified on a real setup |
 | Project agent instructions and permission baseline | implemented | - | The deny rules have not been exercised yet |
@@ -40,9 +41,10 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| chezmoi source state and `packages/packages.toml` | planned | - | |
+| `packages/packages.toml` and `scripts/check-packages.py` | tested | Arch (pacman), Ubuntu 24.04 (apt) and Fedora latest (dnf), in containers: every listed id exists, two wrong dnf ids were found and removed | brew, winget and scoop ids are written from upstream names and not yet checked |
+| chezmoi base: `.chezmoiroot`, prompts, per-OS ignore, tpm external, `.gitconfig`, `.tmux.conf` | tested | Arch, chezmoi v2.74.1, fake home: apply, rendered output, zero-line diff, `verify` exit 0 | zsh, starship, kitty, yazi, lazygit and the Neovim directory are not in the source state yet. Windows and WSL are not verified |
 | `bootstrap/install.sh` and `install.ps1` with `--dry-run` | planned | - | |
-| tmux configuration cleanup, keeping the existing prefix | planned | - | |
+| tmux configuration cleanup, keeping the existing prefix | tested | Arch, tmux 3.6a, isolated server: loads without errors, prefix `M-o` kept, `h` and `l` pane keys corrected, F1 falls back to the key list, kitty detected through `KITTY_WINDOW_ID` | The Neovim navigation bindings and the plugins loaded by tpm were not exercised |
 | tmuxp default layout and `welleng up` | planned | - | |
 | zsh cleanup, starship prompt, fd, delta, lazygit | planned | - | |
 | `welleng keys` generated cheatsheet | planned | - | |
