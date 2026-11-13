@@ -1,0 +1,59 @@
+# Well-Engineering - keep only the actual setup in version control.
+
+# --- Local planning and research notes (not part of the setup) ---
+/docs/architecture.md
+/docs/research/
+
+# --- Secrets and credentials: never tracked ---
+secrets.env
+*.env
+.env
+.env.*
+!*.env.example
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# --- Local machine state and per-machine configuration ---
+local.toml
+/.welleng-backup/
+/backups/
+
+# --- Claude Code local state ---
+.claude/settings.local.json
+.claude/projects/
+.claude/session-data/
+.claude/scheduled_tasks.lock
+CLAUDE.local.md
+
+# --- Temporary and scratch files ---
+tmp/
+scratch/
+*.tmp
+*.bak
+*.orig
+*.rej
+*.log
+*.swp
+*.swo
+*~
+
+# --- Language and tooling artefacts ---
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+node_modules/
+dist/
+build/
+*.egg-info/
+
+# --- Editor and OS noise ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
