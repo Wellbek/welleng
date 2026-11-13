@@ -35,6 +35,33 @@ jobs:
       - name: Check tracked files
         run: scripts/check-hygiene.sh
 
+  packages:
+    name: Package ids (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ubuntu
+            image: ubuntu:24.04
+            prepare: apt-get update -qq && apt-get install -y -qq python3
+            manager: apt
+          - distro: fedora
+            image: fedora:latest
+            prepare: dnf install -y -q python3
+            manager: dnf
+          - distro: arch
+            image: archlinux:latest
+            prepare: pacman -Sy --noconfirm python
+            manager: pacman
+    container: ${{ matrix.image }}
+    steps:
+      - name: Install Python
+        run: ${{ matrix.prepare }}
+      - uses: actions/checkout@v4
+      - name: Check package ids
+        run: python3 -I scripts/check-packages.py ${{ matrix.manager }}
+
   shell:
     name: Shell scripts
     runs-on: ubuntu-latest
