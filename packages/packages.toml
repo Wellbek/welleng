@@ -2,6 +2,7 @@
 #
 # tier:     mandatory | recommended | optional
 # <manager> the package id for that manager, a missing key means "not available there"
+# bins      executable names to look for when they differ from the package name
 # fallback  how to install it when the manager has no package, see the installer
 # note      anything a human needs to know
 #
@@ -68,6 +69,7 @@ note = "Linux and WSL shell, PowerShell 7 is the Windows shell"
 [[package]]
 name = "neovim"
 tier = "mandatory"
+bins = ["nvim"]
 pacman = "neovim"
 apt = "neovim"
 dnf = "neovim"
@@ -79,6 +81,7 @@ note = "Ubuntu 24.04 ships 0.9.5 [verified in container], older than the 0.12 us
 [[package]]
 name = "ripgrep"
 tier = "mandatory"
+bins = ["rg"]
 pacman = "ripgrep"
 apt = "ripgrep"
 dnf = "ripgrep"
@@ -89,6 +92,7 @@ scoop = "ripgrep"
 [[package]]
 name = "fd"
 tier = "mandatory"
+bins = ["fd", "fdfind"]
 pacman = "fd"
 apt = "fd-find"
 dnf = "fd-find"
@@ -110,6 +114,7 @@ scoop = "fzf"
 [[package]]
 name = "bat"
 tier = "mandatory"
+bins = ["bat", "batcat"]
 pacman = "bat"
 apt = "bat"
 dnf = "bat"
@@ -140,6 +145,7 @@ fallback = "https://github.com/jesseduffield/lazygit/releases"
 [[package]]
 name = "delta"
 tier = "mandatory"
+bins = ["delta"]
 pacman = "git-delta"
 apt = "git-delta"
 dnf = "git-delta"
@@ -205,6 +211,7 @@ fallback = "uv tool install tmuxp"
 [[package]]
 name = "gh"
 tier = "recommended"
+bins = ["gh"]
 pacman = "github-cli"
 apt = "gh"
 dnf = "gh"
