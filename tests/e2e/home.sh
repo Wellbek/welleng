@@ -2,6 +2,8 @@
 # End-to-end test of the chezmoi source state, in a throwaway HOME.
 # Needs chezmoi, git, tmux and zsh on PATH. Never touches the real HOME.
 #   tests/e2e/home.sh
+# Single quotes are deliberate below: the code is handed to zsh, which expands it.
+# shellcheck disable=SC2016
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -72,5 +74,30 @@ check_not "glm fails clearly without a key" env PATH="$bin:$PATH" WELLENG_SECRET
 printf 'ZAI_API_KEY=$(touch %s/pwned)\n' "$work" >"$secrets"
 PATH="$bin:$PATH" WELLENG_SECRETS_FILE="$secrets" zsh -c ". '$helper'; glm" >/dev/null 2>&1 || true
 check "a hostile secrets file is parsed, never executed" test ! -e "$work/pwned"
+
+echo "shell integration"
+init="$HOME/.config/welleng/shell/init.zsh"
+check "init.zsh parses" zsh -n "$init"
+check "starship.toml and lazygit.yml are deployed" test -f "$HOME/.config/welleng/starship.toml" -a -f "$HOME/.config/welleng/lazygit.yml"
+plain="$work/plain"
+mkdir -p "$plain"
+for t in zsh bash sh env cat grep; do ln -sf "$(command -v "$t")" "$plain/$t"; done
+printf '#!/bin/sh\n' >"$plain/fdfind"
+printf '#!/bin/sh\n' >"$plain/lazygit"
+printf '#!/bin/sh\necho "true"\n' >"$plain/starship"
+chmod +x "$plain/fdfind" "$plain/lazygit" "$plain/starship"
+# zrun CODE: source init.zsh in a clean zsh that only sees the stub tools, then run CODE.
+zrun() {
+  printf '. %q\n%s\n' "$init" "$1" >"$work/probe.zsh"
+  env -i HOME="$HOME" PATH="$plain" zsh "$work/probe.zsh"
+}
+check "init.zsh does not fail with no real tools installed" zrun ":"
+check "fd is aliased to fdfind when only fdfind exists" test "$(zrun 'whence -w fd')" = "fd: alias"
+check "starship config is chosen when the user has none" test -n "$(zrun 'print -r -- $STARSHIP_CONFIG')"
+mkdir -p "$HOME/.config"
+: >"$HOME/.config/starship.toml"
+check "a user's own starship.toml wins" test -z "$(zrun 'print -r -- $STARSHIP_CONFIG')"
+rm -f "$HOME/.config/starship.toml"
+check "lazygit gets the delta config" grep -q "lazygit.yml" <<<"$(zrun 'print -r -- $LG_CONFIG_FILE')"
 
 finish

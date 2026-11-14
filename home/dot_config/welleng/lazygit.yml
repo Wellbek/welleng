@@ -1,0 +1,5 @@
+# Merged after the user's own lazygit configuration, see shell/init.zsh.
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never

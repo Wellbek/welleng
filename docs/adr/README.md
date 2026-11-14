@@ -30,3 +30,5 @@ Claims in these records carry one of these tags so the strength of the evidence 
 | [0011](0011-avoid-overlap-with-the-ecc-plugin.md) | Avoid overlap with the ecc plugin | Accepted |
 | [0012](0012-hook-event-data-contract.md) | Hook event data contract | Accepted |
 | [0013](0013-effort-only-hints.md) | Effort-only hints | Accepted |
+| [0014](0014-pinned-release-archives-for-tools-without-packages.md) | Pinned release archives for tools without a package | Accepted |
+| [0015](0015-opt-in-shell-integration.md) | Opt-in shell integration that never edits existing files | Accepted |
