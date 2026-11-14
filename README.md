@@ -239,7 +239,7 @@ Every push and pull request runs:
 ## The `welleng` command line
 
 A small Python package run through `uv`, identical on Linux and Windows.
-All commands below are **planned**.
+Only `welleng doctor` exists so far, every other command below is **planned**.
 
 | Command | Purpose |
 |---|---|
@@ -269,6 +269,7 @@ scripts/check-packages.py     check package ids against pacman, apt and dnf
 scripts/init-secrets.sh       create the credentials file with mode 600 and show what is set
 scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code settings
 packages/packages.toml        logical package name to package id per platform
+tools/                        the welleng Python package, `doctor` only so far, with pytest tests
 .chezmoiroot                  points chezmoi at home/
 home/                         chezmoi source state: tmux and git config, tpm, welleng config
 CLAUDE.md                     agent instructions for this repository
@@ -284,7 +285,6 @@ Planned, not created yet:
 bootstrap/                    install.sh, install.ps1, uninstall scripts
 home/                         the rest of the chezmoi source state: zsh, starship, kitty, yazi, lazygit, Neovim
 claude-plugin/                the welleng Claude Code plugin
-tools/                        the welleng Python package and its tests
 ```
 
 ## Platform support

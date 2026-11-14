@@ -48,7 +48,7 @@ Anything that needs a device or an operating system that has not been reached is
 | tmuxp default layout and `welleng up` | planned | - | |
 | zsh cleanup, starship prompt, fd, delta, lazygit | planned | - | |
 | `welleng keys` generated cheatsheet | planned | - | |
-| `welleng doctor` skeleton | planned | - | |
+| `welleng doctor` skeleton | tested | Arch: 4 pytest tests pass, and a live run reports the real machine and exits 1 on missing mandatory tools | Looks executables up on `PATH` only, it does not check versions, and Windows is not run. Not in CI yet |
 | Linux container matrix in CI | planned | - | |
 | Windows CI job for bootstrap and `doctor` | planned | - | |
 
