@@ -235,12 +235,13 @@ Every push and pull request runs:
 - the repository hygiene script
 - Bash syntax checks and ShellCheck on all shell scripts
 - the `regression` job: security policy checks, the Python tests and the end-to-end home test in an Arch container
+- the `bootstrap` job: a real install in clean Ubuntu, Fedora and Arch containers
 - a check that every package id in `packages/packages.toml` exists in the repositories of Ubuntu 24.04, Fedora and Arch
 
 ## The `welleng` command line
 
 A small Python package run through `uv`, identical on Linux and Windows.
-Only `welleng doctor` exists so far, every other command below is **planned**.
+`welleng doctor`, `welleng keys` and `welleng repos` exist, every other command below is **planned**.
 
 | Command | Purpose |
 |---|---|
@@ -273,7 +274,10 @@ scripts/chezmoi-container.sh  run a command in a clean Arch container
 tests/                        security policy checks and the end-to-end home test
 scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code settings
 packages/packages.toml        logical package name to package id per platform
-tools/                        the welleng Python package, `doctor` only so far, with pytest tests
+packages/releases.toml        pinned release archives with SHA-256 for tools without a package
+bootstrap/                    install.sh, plan.py and install_release.py
+scripts/distro-container.sh   run a command in a clean Ubuntu, Fedora or Arch container
+tools/                        the welleng Python package (`doctor`, `keys`, `repos`) with pytest tests
 .chezmoiroot                  points chezmoi at home/
 home/                         chezmoi source state: tmux and git config, tpm, welleng config
 CLAUDE.md                     agent instructions for this repository
@@ -286,7 +290,7 @@ docs/platforms.md             platform tiers and verification policy
 Planned, not created yet:
 
 ```
-bootstrap/                    install.sh, install.ps1, uninstall scripts
+bootstrap/                    install.ps1 and the uninstall scripts
 home/                         the rest of the chezmoi source state: zsh, starship, kitty, yazi, lazygit, Neovim
 claude-plugin/                the welleng Claude Code plugin
 ```

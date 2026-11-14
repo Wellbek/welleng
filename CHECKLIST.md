@@ -43,11 +43,13 @@ Anything that needs a device or an operating system that has not been reached is
 |---|---|---|---|
 | `packages/packages.toml` and `scripts/check-packages.py` | tested | Arch (pacman), Ubuntu 24.04 (apt) and Fedora latest (dnf), in containers: every listed id exists, two wrong dnf ids were found and removed | brew, winget and scoop ids are written from upstream names and not yet checked |
 | chezmoi base: `.chezmoiroot`, prompts, per-OS ignore, tpm external, `.gitconfig`, `.tmux.conf` | tested | Arch, chezmoi v2.74.1, fake home: apply, rendered output, zero-line diff, `verify` exit 0 | zsh, starship, kitty, yazi, lazygit and the Neovim directory are not in the source state yet. Windows and WSL are not verified |
-| `bootstrap/install.sh` and `install.ps1` with `--dry-run` | planned | - | |
+| `bootstrap/install.sh` with `--dry-run`, `--yes`, `--tiers` | tested | Tested in container: Ubuntu 24.04, Fedora latest and Arch latest, 20 checks each, covering dry run, real install, mandatory tools on PATH, idempotence and a rejected bad checksum | Never run on the maintainer host, by design. macOS and Homebrew are not run. Applying the chezmoi config is a separate opt-in flag that was not exercised here |
+| Pinned release archives: `packages/releases.toml`, `bootstrap/install_release.py`, `scripts/pin-releases.py` | tested | Tested in container (three distros) and 8 unit tests: wrong digest, non-https, path traversal, missing member, zip and tar | Linux x86_64 and aarch64 only, aarch64 digests are pinned but the binaries were not run |
+| `bootstrap/install.ps1` | planned | - | |
 | tmux configuration cleanup, keeping the existing prefix | tested | Arch, tmux 3.6a, isolated server: loads without errors, prefix `M-o` kept, `h` and `l` pane keys corrected, F1 falls back to the key list, kitty detected through `KITTY_WINDOW_ID` | The Neovim navigation bindings and the plugins loaded by tpm were not exercised |
 | tmuxp default layout and `welleng up` | planned | - | |
-| zsh cleanup, starship prompt, fd, delta, lazygit | planned | - | |
-| `welleng keys` generated cheatsheet | planned | - | |
+| Opt-in shell integration `init.zsh`, starship and lazygit (delta) config | tested | Tested in container (Arch): parses, guarded with no tools present, fd alias on Debian naming, a user's own starship config wins, lazygit config is chained | Not run in a real interactive session. The maintainer's own `~/.zshrc` is not modified, see ADR 0015 |
+| `welleng keys` generated cheatsheet | tested | Arch: 3 unit tests, and the real `dot_tmux.conf` parses | Reads tmux bindings only, Neovim and lazygit keys are not included yet. It is a filtered list, not an interactive fuzzy finder |
 | Regression harness: `scripts/regression.sh` with hygiene, secret scan, ShellCheck, security policy, Python and end-to-end stages | tested | Arch host plus an Arch container: `--strict` run passes all 7 stages, and planted violations (a filled secret, an API-key-shaped token, a pipe into a shell) are caught | The CI `regression` job is written, not yet run on GitHub. Only Arch is covered, Ubuntu and Fedora end-to-end runs are not written |
 | End-to-end home test `tests/e2e/home.sh` | tested | Arch container, chezmoi from pacman, throwaway HOME: apply, verify, idempotence, credential handling, tmux load, `glm` with a stub `claude` and a hostile secrets file | Externals (tpm) are excluded because they need the network |
 | Static security checks `tests/security/static.sh` | tested | Arch host | Policy checks on tracked files, not a replacement for a dependency or CVE scan |
@@ -70,7 +72,7 @@ Anything that needs a device or an operating system that has not been reached is
 |---|---|---|---|
 | lazygit configuration with the delta pager | planned | - | |
 | gitsigns and diffview keymaps | planned | - | No terminal tool reproduces every behaviour of a graphical diff editor |
-| `welleng repos` multi-repository overview | planned | - | |
+| `welleng repos` multi-repository overview | tested | Arch: 4 unit tests against real throwaway git repositories (branch, staged, unstaged, untracked, ahead and behind) and a live run | Scans two levels deep, no remote fetch, so ahead and behind reflect the last fetch |
 
 ## Phase 4 - Claude Code integration and project harness
 
