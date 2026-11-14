@@ -69,8 +69,25 @@ jobs:
       - uses: actions/checkout@v4
       - name: Syntax check
         run: |
-          for f in scripts/*.sh .githooks/pre-commit; do
+          for f in scripts/*.sh .githooks/pre-commit tests/*.sh tests/*/*.sh; do
             bash -n "$f"
           done
       - name: ShellCheck
-        run: shellcheck scripts/*.sh .githooks/pre-commit
+        run: shellcheck -x scripts/*.sh .githooks/pre-commit tests/*.sh tests/*/*.sh
+
+  regression:
+    name: Regression (Arch container)
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed chezmoi git tmux zsh python uv shellcheck
+      - uses: actions/checkout@v4
+      - name: Allow git in the container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Security policy checks
+        run: tests/security/static.sh
+      - name: Python unit tests
+        run: cd tools && uv run --quiet pytest -q
+      - name: End-to-end home test
+        run: tests/e2e/home.sh

@@ -48,6 +48,9 @@ Anything that needs a device or an operating system that has not been reached is
 | tmuxp default layout and `welleng up` | planned | - | |
 | zsh cleanup, starship prompt, fd, delta, lazygit | planned | - | |
 | `welleng keys` generated cheatsheet | planned | - | |
+| Regression harness: `scripts/regression.sh` with hygiene, secret scan, ShellCheck, security policy, Python and end-to-end stages | tested | Arch host plus an Arch container: `--strict` run passes all 7 stages, and planted violations (a filled secret, an API-key-shaped token, a pipe into a shell) are caught | The CI `regression` job is written, not yet run on GitHub. Only Arch is covered, Ubuntu and Fedora end-to-end runs are not written |
+| End-to-end home test `tests/e2e/home.sh` | tested | Arch container, chezmoi from pacman, throwaway HOME: apply, verify, idempotence, credential handling, tmux load, `glm` with a stub `claude` and a hostile secrets file | Externals (tpm) are excluded because they need the network |
+| Static security checks `tests/security/static.sh` | tested | Arch host | Policy checks on tracked files, not a replacement for a dependency or CVE scan |
 | `welleng doctor` skeleton | tested | Arch: 4 pytest tests pass, and a live run reports the real machine and exits 1 on missing mandatory tools | Looks executables up on `PATH` only, it does not check versions, and Windows is not run. Not in CI yet |
 | Linux container matrix in CI | planned | - | |
 | Windows CI job for bootstrap and `doctor` | planned | - | |

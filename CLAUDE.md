@@ -38,6 +38,7 @@ Read `README.md` for the architecture and `docs/adr/` for the reasons behind eac
 - One concern per commit, with a Conventional Commits style subject such as `feat:`, `fix:`, `docs:`, `chore:` or `ci:`.
 - Enable the hooks once per clone with `git config core.hooksPath .githooks`.
 - Run `scripts/check-hygiene.sh` before pushing.
+- Run `scripts/regression.sh --strict` after every significant change, it needs Docker for the container stages.
 - Local planning notes live in `docs/architecture.md` and `docs/research/`, both gitignored.
   Do not commit them.
 

@@ -234,6 +234,7 @@ Every push and pull request runs:
 - a full-history secret scan with a pinned, checksum-verified `gitleaks`
 - the repository hygiene script
 - Bash syntax checks and ShellCheck on all shell scripts
+- the `regression` job: security policy checks, the Python tests and the end-to-end home test in an Arch container
 - a check that every package id in `packages/packages.toml` exists in the repositories of Ubuntu 24.04, Fedora and Arch
 
 ## The `welleng` command line
@@ -267,6 +268,9 @@ scripts/scan-secrets-fallback.sh
 scripts/install-gitleaks.sh   pinned, checksum-verified gitleaks install without root
 scripts/check-packages.py     check package ids against pacman, apt and dnf
 scripts/init-secrets.sh       create the credentials file with mode 600 and show what is set
+scripts/regression.sh         full regression run, see below
+scripts/chezmoi-container.sh  run a command in a clean Arch container
+tests/                        security policy checks and the end-to-end home test
 scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code settings
 packages/packages.toml        logical package name to package id per platform
 tools/                        the welleng Python package, `doctor` only so far, with pytest tests
