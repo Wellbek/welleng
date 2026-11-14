@@ -3,8 +3,11 @@
 # end-to-end home test.
 #   scripts/regression.sh              host stages, container stage when docker is available
 #   scripts/regression.sh --quick      host stages only, no container
+#   scripts/regression.sh --matrix     also run the bootstrap end-to-end test on Ubuntu, Fedora and Arch containers
 #   scripts/regression.sh --strict     a skipped stage counts as a failure (use in CI and before release)
 # Every stage ends as PASS, FAIL or SKIP, and the exit code is non-zero on any FAIL.
+# The stage_* functions are called indirectly by run_stage, so ShellCheck cannot see the calls.
+# shellcheck disable=SC2329
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -12,10 +15,12 @@ cd "$root"
 
 quick=0
 strict=0
+matrix=0
 for arg in "$@"; do
   case "$arg" in
     --quick) quick=1 ;;
     --strict) strict=1 ;;
+    --matrix) matrix=1 ;;
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
 done
@@ -82,6 +87,11 @@ run_stage "security policy checks" stage_security
 run_stage "package map parses" stage_packages
 run_stage "Python unit tests" stage_python
 run_stage "end-to-end home test" stage_e2e
+if [ "$matrix" -eq 1 ]; then
+  for distro in ubuntu fedora arch; do
+    run_stage "bootstrap end-to-end on $distro" scripts/distro-container.sh "$distro" tests/e2e/bootstrap.sh
+  done
+fi
 
 printf '\n== summary\n'
 printf '%s\n' "${results[@]}"

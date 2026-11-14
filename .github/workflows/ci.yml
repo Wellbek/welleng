@@ -69,11 +69,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Syntax check
         run: |
-          for f in scripts/*.sh .githooks/pre-commit tests/*.sh tests/*/*.sh; do
+          for f in scripts/*.sh bootstrap/*.sh .githooks/pre-commit tests/*.sh tests/*/*.sh; do
             bash -n "$f"
           done
       - name: ShellCheck
-        run: shellcheck -x scripts/*.sh .githooks/pre-commit tests/*.sh tests/*/*.sh
+        run: shellcheck scripts/*.sh bootstrap/*.sh .githooks/pre-commit tests/*.sh tests/*/*.sh
 
   regression:
     name: Regression (Arch container)
@@ -91,3 +91,15 @@ jobs:
         run: cd tools && uv run --quiet pytest -q
       - name: End-to-end home test
         run: tests/e2e/home.sh
+
+  bootstrap:
+    name: Bootstrap (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [ubuntu, fedora, arch]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install and verify in a clean container
+        run: scripts/distro-container.sh ${{ matrix.distro }} tests/e2e/bootstrap.sh
