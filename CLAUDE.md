@@ -56,4 +56,4 @@ Existing today:
 
 Planned, not created yet:
 
-- the rest of `home/` (kitty, yazi), `welleng up` and `welleng update`, and everything in `docs/verification/` that needs a device
+- the rest of `home/` (kitty, yazi), and everything in `docs/verification/` that needs a device

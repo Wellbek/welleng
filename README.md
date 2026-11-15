@@ -241,8 +241,8 @@ Every push and pull request runs:
 
 ## The `welleng` command line
 
-A small Python package run through `uv`, identical on Linux and Windows.
-`welleng doctor`, `keys`, `repos`, `harness`, `agents`, `ssh`, `hints` and `rc` exist, every other command below is **planned**.
+A small Python package run through `uv`, written to behave the same on Linux and Windows, but only run on Linux so far.
+All commands below exist except `welleng up` attaching in every setup, which is only tested with `--no-attach`.
 
 | Command | Purpose |
 |---|---|
@@ -285,7 +285,7 @@ scripts/uninstall.sh          dry-run-first removal of everything this project a
 home/dot_config/welleng-nvim/ LazyVim configuration, run as NVIM_APPNAME=welleng-nvim
 docs/verification/            manual procedures for Windows, WSL2, phone and interactive checks
 docs/troubleshooting.md       known problems and fixes
-tools/                        the welleng Python package (`doctor`, `keys`, `repos`, `harness`, `agents`, `ssh`, `hints`, `rc`) with pytest tests
+tools/                        the welleng Python package (`doctor`, `keys`, `repos`, `harness`, `agents`, `ssh`, `hints`, `rc`, `up`, `update`) with pytest tests
 .chezmoiroot                  points chezmoi at home/
 home/                         chezmoi source state: tmux and git config, tpm, welleng config
 CLAUDE.md                     agent instructions for this repository
@@ -411,7 +411,7 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 ## Known limitations
 
 - Native Windows, WSL2 and macOS have never been run, see `docs/verification/`.
-- `welleng up`, `welleng update`, kitty and yazi configuration are not written yet.
+- kitty and yazi configuration are not written yet.
 - A literal "press Enter to skip" is impossible in Claude Code's input, because an empty prompt is ignored.
 - Remote Control cannot control sessions routed to another provider.
 - A terminal cannot match a graphical diff editor exactly.
