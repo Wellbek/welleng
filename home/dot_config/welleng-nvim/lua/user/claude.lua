@@ -45,6 +45,8 @@ end
 
 function M.ask(kind, visual)
   local text = M.prompts[kind]
+  -- Belt and braces: the plugin is loaded at startup, but make sure before using its commands.
+  pcall(function() require("lazy").load({ plugins = { "claudecode.nvim" } }) end)
   vim.cmd(visual and "ClaudeCodeSend" or "ClaudeCodeAdd %")
   local pane = M.pane()
   if not pane then

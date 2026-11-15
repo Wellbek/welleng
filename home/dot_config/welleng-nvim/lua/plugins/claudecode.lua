@@ -3,7 +3,11 @@
 return {
   {
     "coder/claudecode.nvim",
-    opts = { terminal = { provider = "none" } },
+    -- A spec with `keys` is lazy by default, which would leave the bridge server and its lock file
+    -- absent until the first plugin key is pressed, so `claude --ide` would find no editor.
+    lazy = false,
+    -- Warnings and errors only: the INFO start and stop lines would print on every Neovim exit.
+    opts = { log_level = "warn", terminal = { provider = "none" } },
     keys = {
       { "<leader>a", nil, desc = "AI / Claude Code" },
       { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send selection to Claude" },

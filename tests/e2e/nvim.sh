@@ -54,6 +54,7 @@ check "the user keymap layer is active" nv "+lua assert(vim.fn.maparg('<leader>w
 check "the Claude Code bridge keys exist" nv "+lua assert(vim.fn.maparg('<leader>ab','n') ~= '')" +qa
 check "the diffview commands and keys exist" nv "+lua assert(vim.fn.maparg('<leader>gd','n') ~= '' and vim.fn.maparg('<leader>gH','n') ~= '' and vim.fn.maparg('<leader>gm','n') ~= '')" +qa
 check "the gitsigns blame toggle key exists" nv "+lua assert(vim.fn.maparg('<leader>gT','n') ~= '')" +qa
+check "the Claude bridge is loaded at startup, so claude --ide can find the editor" nv "+lua assert(vim.fn.exists(':ClaudeCodeSend') == 2 and vim.fn.exists(':ClaudeCodeAdd') == 2)" +qa
 check "the contextual Claude prompt keys exist in normal and visual mode" nv "+lua for _,k in ipairs({'e','f','t','r'}) do assert(vim.fn.maparg('<leader>a'..k,'n') ~= '' and vim.fn.maparg('<leader>a'..k,'v') ~= '') end" +qa
 check "the Claude pane is found by command name or version, and never the own pane" nv "+lua local c=require('user.claude'); assert(c.find_pane('%1\\tzsh\\n%2\\t2.1.325\\n', '%1') == '%2'); assert(c.find_pane('%1\\tclaude\\n', '%1') == nil); assert(c.find_pane('%1\\tzsh\\n%3\\tnvim\\n', '%9') == nil)" +qa
 check "diffview opens on a real repository with a change" diffview_opens
