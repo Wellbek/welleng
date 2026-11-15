@@ -79,13 +79,16 @@ echo "shell integration"
 init="$HOME/.config/welleng/shell/init.zsh"
 check "init.zsh parses" zsh -n "$init"
 check "starship.toml and lazygit.yml are deployed" test -f "$HOME/.config/welleng/starship.toml" -a -f "$HOME/.config/welleng/lazygit.yml"
+check "kitty, yazi and Claude instruction files are deployed" test -f "$HOME/.config/welleng/kitty/welleng.conf" -a -f "$HOME/.config/welleng/yazi/yazi.toml" -a -f "$HOME/.config/welleng/claude/CLAUDE.md"
+check "no kitty, yazi or Claude config of the user's is created" test ! -e "$HOME/.config/kitty" -a ! -e "$HOME/.config/yazi" -a ! -e "$HOME/.claude"
 plain="$work/plain"
 mkdir -p "$plain"
 for t in zsh bash sh env cat grep; do ln -sf "$(command -v "$t")" "$plain/$t"; done
 printf '#!/bin/sh\n' >"$plain/fdfind"
 printf '#!/bin/sh\n' >"$plain/lazygit"
 printf '#!/bin/sh\necho "true"\n' >"$plain/starship"
-chmod +x "$plain/fdfind" "$plain/lazygit" "$plain/starship"
+printf '#!/bin/sh\n' >"$plain/yazi"
+chmod +x "$plain/fdfind" "$plain/lazygit" "$plain/starship" "$plain/yazi"
 # zrun CODE: source init.zsh in a clean zsh that only sees the stub tools, then run CODE.
 zrun() {
   printf '. %q\n%s\n' "$init" "$1" >"$work/probe.zsh"
@@ -100,5 +103,10 @@ mkdir -p "$HOME/.config"
 check "a user's own starship.toml wins" test -z "$(zrun 'print -r -- $STARSHIP_CONFIG')"
 rm -f "$HOME/.config/starship.toml"
 check "lazygit gets the delta config" grep -q "lazygit.yml" <<<"$(zrun 'print -r -- $LG_CONFIG_FILE')"
+check "yazi gets the welleng config directory" grep -q "/shell/../yazi$" <<<"$(zrun 'print -r -- $YAZI_CONFIG_HOME')"
+check "the y function exists" test "$(zrun 'whence -w y')" = "y: function"
+mkdir -p "$HOME/.config/yazi"
+check "a user's own yazi directory wins" test -z "$(zrun 'print -r -- $YAZI_CONFIG_HOME')"
+rmdir "$HOME/.config/yazi"
 
 finish

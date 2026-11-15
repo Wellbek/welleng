@@ -43,6 +43,24 @@ if (( $+commands[fzf] )) && [[ -z "${FZF_DEFAULT_COMMAND-}" ]]; then
   fi
 fi
 
+# yazi: use the welleng config only when the user has none, and add `y`, which changes directory on exit.
+if (( $+commands[yazi] )); then
+  if [[ -z "${YAZI_CONFIG_HOME-}" && ! -e "${XDG_CONFIG_HOME:-$HOME/.config}/yazi" ]]; then
+    export YAZI_CONFIG_HOME="$_welleng_dir/../yazi"
+  fi
+  if ! (( $+functions[y] )) && ! (( $+aliases[y] )); then
+    y() {
+      local tmp cwd
+      tmp="$(mktemp -t yazi-cwd.XXXXXX)"
+      command yazi "$@" --cwd-file="$tmp"
+      if cwd="$(<"$tmp")" && [[ -n "$cwd" && "$cwd" != "$PWD" ]]; then
+        builtin cd -- "$cwd"
+      fi
+      rm -f -- "$tmp"
+    }
+  fi
+fi
+
 # lazygit: add the welleng config (delta pager) after the user's own file, if they have one.
 if (( $+commands[lazygit] )) && [[ -z "${LG_CONFIG_FILE-}" ]]; then
   _lg_user="${XDG_CONFIG_HOME:-$HOME/.config}/lazygit/config.yml"

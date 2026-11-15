@@ -1,0 +1,8 @@
+# Managed by chezmoi, edit it in the welleng repository.
+# Used only when YAZI_CONFIG_HOME points here, see shell/init.zsh, so an existing ~/.config/yazi is never replaced.
+[mgr]
+ratio = [1, 3, 4]
+sort_by = "natural"
+sort_dir_first = true
+show_hidden = true
+show_symlink = true
