@@ -50,10 +50,9 @@ Existing today:
 - `scripts/` repository hygiene, secret scanning, `install-gitleaks.sh`, `check-packages.py`, `init-secrets.sh` and `apply-ecc-overrides.py`
 - `.githooks/` pre-commit gate
 - `packages/packages.toml` the package map, checked against pacman, apt and dnf in CI
+- `bootstrap/` installer and pinned releases, `claude-plugin/` the plugin with the `/harness` skill, `tools/` the `welleng` Python package
 - `.chezmoiroot` and `home/` the chezmoi source state so far: tmux and git config, the tpm external, and `dot_config/welleng/` with the credentials example, zsh helpers and the `ecc` override list
 
 Planned, not created yet:
 
-- the rest of `home/` (zsh, starship, kitty, yazi, lazygit, Neovim) and the `bootstrap/` installers
-- `claude-plugin/` the Claude Code plugin with the `/harness` skill and hooks
-- `tools/` the `welleng` Python package
+- the rest of `home/` (kitty, yazi, Neovim), `bootstrap/install.ps1`, agent monitoring, remote machines and effort hints

@@ -50,7 +50,7 @@ Anything that needs a device or an operating system that has not been reached is
 | tmuxp default layout and `welleng up` | planned | - | |
 | Opt-in shell integration `init.zsh`, starship and lazygit (delta) config | tested | Tested in container (Arch): parses, guarded with no tools present, fd alias on Debian naming, a user's own starship config wins, lazygit config is chained | Not run in a real interactive session. The maintainer's own `~/.zshrc` is not modified, see ADR 0015 |
 | `welleng keys` generated cheatsheet | tested | Arch: 3 unit tests, and the real `dot_tmux.conf` parses | Reads tmux bindings only, Neovim and lazygit keys are not included yet. It is a filtered list, not an interactive fuzzy finder |
-| Regression harness: `scripts/regression.sh` with hygiene, secret scan, ShellCheck, security policy, Python and end-to-end stages | tested | Arch host plus an Arch container: `--strict` run passes all 7 stages, and planted violations (a filled secret, an API-key-shaped token, a pipe into a shell) are caught | The CI `regression` job is written, not yet run on GitHub. Only Arch is covered, Ubuntu and Fedora end-to-end runs are not written |
+| Regression harness: `scripts/regression.sh` with hygiene, secret scan, ShellCheck, security policy, Python and end-to-end stages | tested | Arch host plus an Arch container: `--strict` run passes all 7 stages, and planted violations (a filled secret, an API-key-shaped token, a pipe into a shell) are caught | The CI `regression` and `bootstrap` jobs ran green on GitHub Actions. Only Arch is covered, Ubuntu and Fedora end-to-end runs are not written |
 | End-to-end home test `tests/e2e/home.sh` | tested | Arch container, chezmoi from pacman, throwaway HOME: apply, verify, idempotence, credential handling, tmux load, `glm` with a stub `claude` and a hostile secrets file | Externals (tpm) are excluded because they need the network |
 | Static security checks `tests/security/static.sh` | tested | Arch host | Policy checks on tracked files, not a replacement for a dependency or CVE scan |
 | `welleng doctor` skeleton | tested | Arch: 4 pytest tests pass, and a live run reports the real machine and exits 1 on missing mandatory tools | Looks executables up on `PATH` only, it does not check versions, and Windows is not run. Not in CI yet |
@@ -79,10 +79,10 @@ Anything that needs a device or an operating system that has not been reached is
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
 | Global instructions managed by chezmoi | planned | - | |
-| `welleng` Claude Code plugin skeleton and settings merge | planned | - | |
+| `welleng` Claude Code plugin skeleton | tested | Arch: `claude plugin validate` passes on Claude Code 2.1.325, and the SessionStart hook is exercised by piping events (suggests once in a bare git repo, silent when configured, on resume, outside a repo or on garbage input) | The hook was not run inside a live Claude Code session, so how its `additionalContext` is presented is unverified. The plugin has not been installed from a marketplace |
 | claudecode.nvim bridge and contextual prompt keys | planned | - | |
-| `/harness` questionnaire skill with a plan-of-changes preview | planned | - | An empty Enter is not accepted by Claude Code, a skip token is used |
-| `welleng harness check` validator | planned | - | |
+| `/harness` questionnaire skill with a plan-of-changes preview | implemented, verification pending | - | The skill text validates, but no live session has run the questionnaire. Manual check: install the plugin, run `/harness` in a throwaway repository and confirm nothing is written before approval. It needs `welleng` on PATH, install with `uv tool install` from `tools/` |
+| `welleng harness plan`, `apply` and `check` | tested | Arch: 9 unit tests: plan writes nothing, apply is idempotent, existing JSON and Markdown are preserved, managed blocks replace only their own text, credentials and literal MCP env values are refused, invalid JSON is never overwritten, `apply` needs `--yes` | Hook commands are checked for existence and the executable bit only, not run |
 
 ## Phase 5 - Agent monitoring
 

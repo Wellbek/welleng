@@ -241,7 +241,7 @@ Every push and pull request runs:
 ## The `welleng` command line
 
 A small Python package run through `uv`, identical on Linux and Windows.
-`welleng doctor`, `welleng keys` and `welleng repos` exist, every other command below is **planned**.
+`welleng doctor`, `keys`, `repos` and `harness` exist, every other command below is **planned**.
 
 | Command | Purpose |
 |---|---|
@@ -276,8 +276,9 @@ scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code set
 packages/packages.toml        logical package name to package id per platform
 packages/releases.toml        pinned release archives with SHA-256 for tools without a package
 bootstrap/                    install.sh, plan.py and install_release.py
+claude-plugin/                the welleng Claude Code plugin: /harness skill and a SessionStart suggestion
 scripts/distro-container.sh   run a command in a clean Ubuntu, Fedora or Arch container
-tools/                        the welleng Python package (`doctor`, `keys`, `repos`) with pytest tests
+tools/                        the welleng Python package (`doctor`, `keys`, `repos`, `harness`) with pytest tests
 .chezmoiroot                  points chezmoi at home/
 home/                         chezmoi source state: tmux and git config, tpm, welleng config
 CLAUDE.md                     agent instructions for this repository
@@ -292,7 +293,6 @@ Planned, not created yet:
 ```
 bootstrap/                    install.ps1 and the uninstall scripts
 home/                         the rest of the chezmoi source state: zsh, starship, kitty, yazi, lazygit, Neovim
-claude-plugin/                the welleng Claude Code plugin
 ```
 
 ## Platform support
