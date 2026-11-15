@@ -22,4 +22,6 @@ No existing file in `$HOME` is modified by an apply.
 ## Consequences
 
 The new defaults do nothing until the user opts in with one line.
+Even then, sourcing `init.zsh` only adds the credential helpers and the `glm` function, because a container test against a copy of the maintainer's real files showed that the prompt, zoxide, fzf and lazygit integrations visibly change an existing setup.
+Those are a second opt-in, `WELLENG_SHELL_EXTRAS=1` set before sourcing, and each is skipped when the user's shell already set it up.
 A full replacement of the shell setup is a separate, explicit later step that needs the maintainer's approval.

@@ -89,10 +89,11 @@ chmod +x "$plain/fdfind" "$plain/lazygit" "$plain/starship"
 # zrun CODE: source init.zsh in a clean zsh that only sees the stub tools, then run CODE.
 zrun() {
   printf '. %q\n%s\n' "$init" "$1" >"$work/probe.zsh"
-  env -i HOME="$HOME" PATH="$plain" zsh "$work/probe.zsh"
+  env -i HOME="$HOME" PATH="$plain" WELLENG_SHELL_EXTRAS="${EXTRAS-1}" zsh "$work/probe.zsh"
 }
 check "init.zsh does not fail with no real tools installed" zrun ":"
 check "fd is aliased to fdfind when only fdfind exists" test "$(zrun 'whence -w fd')" = "fd: alias"
+check "by default no prompt or lazygit change is made" test -z "$(EXTRAS=0 zrun 'print -r -- "$STARSHIP_CONFIG$LG_CONFIG_FILE"')"
 check "starship config is chosen when the user has none" test -n "$(zrun 'print -r -- $STARSHIP_CONFIG')"
 mkdir -p "$HOME/.config"
 : >"$HOME/.config/starship.toml"

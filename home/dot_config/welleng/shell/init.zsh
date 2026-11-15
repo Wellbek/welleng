@@ -2,6 +2,10 @@
 #   [[ -r ~/.config/welleng/shell/init.zsh ]] && source ~/.config/welleng/shell/init.zsh
 # Every integration is guarded, so a missing tool never breaks the shell.
 # Nothing here touches existing user configuration files.
+#
+# By default this only defines the credential helpers and the glm function, and adds fd and bat
+# aliases where Debian naming hides them. The visible changes (prompt, zoxide, fzf, lazygit pager)
+# are a separate opt-in: set WELLENG_SHELL_EXTRAS=1 in ~/.zshrc before sourcing this file.
 
 _welleng_dir="${${(%):-%x}:A:h}"
 
@@ -12,18 +16,26 @@ _welleng_dir="${${(%):-%x}:A:h}"
 if ! (( $+commands[fd] )) && (( $+commands[fdfind] )); then alias fd=fdfind; fi
 if ! (( $+commands[bat] )) && (( $+commands[batcat] )); then alias bat=batcat; fi
 
+if [[ "${WELLENG_SHELL_EXTRAS-}" == 1 ]]; then
+
 # Prompt, only when the user has no starship configuration of their own.
-if (( $+commands[starship] )); then
+# Every integration below is skipped when the user's shell already set it up, so this file never
+# overrides existing behaviour.
+if (( $+commands[starship] )) && [[ -z "${STARSHIP_SHELL-}" ]]; then
   if [[ -z "${STARSHIP_CONFIG-}" && ! -e "$HOME/.config/starship.toml" ]]; then
     export STARSHIP_CONFIG="$_welleng_dir/../starship.toml"
   fi
   eval "$(starship init zsh)"
 fi
 
-(( $+commands[zoxide] )) && eval "$(zoxide init zsh)"
+if (( $+commands[zoxide] )) && ! (( $+functions[__zoxide_z] )); then
+  eval "$(zoxide init zsh)"
+fi
 
-if (( $+commands[fzf] )); then
+if (( $+commands[fzf] )) && ! (( $+widgets[fzf-history-widget] )); then
   source <(fzf --zsh 2>/dev/null) 2>/dev/null
+fi
+if (( $+commands[fzf] )) && [[ -z "${FZF_DEFAULT_COMMAND-}" ]]; then
   if (( $+commands[fd] )); then
     export FZF_DEFAULT_COMMAND="fd --type f --hidden --exclude .git"
   elif (( $+commands[fdfind] )); then
@@ -40,6 +52,8 @@ if (( $+commands[lazygit] )) && [[ -z "${LG_CONFIG_FILE-}" ]]; then
     export LG_CONFIG_FILE="$_welleng_dir/../lazygit.yml"
   fi
   unset _lg_user
+fi
+
 fi
 
 unset _welleng_dir
