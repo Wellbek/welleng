@@ -75,9 +75,20 @@ jobs:
       - name: PowerShell syntax
         shell: pwsh
         run: |
-          $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile("bootstrap/install.ps1", [ref]$null, [ref]$errors) | Out-Null
-          if ($errors.Count -gt 0) { $errors | ForEach-Object { $_.Message }; exit 1 }
+          $failed = $false
+          foreach ($f in "bootstrap/install.ps1", "home/Documents/PowerShell/welleng.ps1") {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($f, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) { $errors | ForEach-Object { "${f}: $($_.Message)" }; $failed = $true }
+          }
+          if ($failed) { exit 1 }
+      - name: PowerShell profile behaviour
+        shell: pwsh
+        run: ./tests/e2e/powershell-profile.ps1
+      - name: WezTerm config syntax
+        run: |
+          sudo apt-get install -y -qq lua5.4
+          luac5.4 -p home/dot_config/wezterm/wezterm.lua
       - name: ShellCheck
         run: shellcheck scripts/*.sh bootstrap/*.sh .githooks/pre-commit tests/*.sh tests/*/*.sh
 
@@ -111,3 +122,34 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install and verify in a clean container
         run: scripts/distro-container.sh ${{ matrix.distro }} tests/e2e/bootstrap.sh
+
+  distro:
+    name: Home and Python tests (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [ubuntu, fedora]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap, then run the home and Python tests in a clean container
+        run: scripts/distro-container.sh ${{ matrix.distro }} tests/e2e/distro.sh
+
+  windows:
+    # Native Windows is best effort (ADR 0004), so a failure here is shown but does not fail the build.
+    name: Windows (best effort)
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installer dry run
+        shell: pwsh
+        run: ./bootstrap/install.ps1 -DryRun
+      - name: welleng doctor and its tests
+        shell: pwsh
+        run: |
+          python -m pip install --quiet ./tools pytest
+          python -m welleng.cli doctor --packages packages/packages.toml
+          # Exit code 1 means a mandatory tool is missing on the runner, which is expected, anything higher is a crash.
+          if ($LASTEXITCODE -gt 1) { exit $LASTEXITCODE }
+          python -m pytest -q tools/tests/test_doctor.py tools/tests/test_plan.py
