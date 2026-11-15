@@ -51,8 +51,9 @@ Existing today:
 - `.githooks/` pre-commit gate
 - `packages/packages.toml` the package map, checked against pacman, apt and dnf in CI
 - `bootstrap/` installer and pinned releases, `claude-plugin/` the plugin with the `/harness` skill, `tools/` the `welleng` Python package
-- `.chezmoiroot` and `home/` the chezmoi source state so far: tmux and git config, the tpm external, and `dot_config/welleng/` with the credentials example, zsh helpers and the `ecc` override list
+- `.chezmoiroot` and `home/` the chezmoi source state: tmux and git config, the tpm external, `dot_config/welleng/` (credentials example, shell helpers, starship, lazygit, tmux segment, `ecc` overrides) and `dot_config/welleng-nvim/`
+- `scripts/wire-in.sh`, `scripts/uninstall.sh`, `docs/verification/` and `docs/troubleshooting.md`
 
 Planned, not created yet:
 
-- the rest of `home/` (kitty, yazi, Neovim), `bootstrap/install.ps1`, agent monitoring, remote machines and effort hints
+- the rest of `home/` (kitty, yazi), `welleng up` and `welleng update`, and everything in `docs/verification/` that needs a device

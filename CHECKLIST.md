@@ -61,10 +61,10 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| LazyVim base with a `lua/user/` layer | planned | - | |
-| Language extras and Mason bootstrap | planned | - | |
-| Markdown rendering in the editor | planned | - | |
-| `NVIM_APPNAME` fallback to the previous configuration | planned | - | |
+| LazyVim base with a `lua/user/` layer | tested | Tested in container (Arch, Neovim from pacman, network to GitHub): plugins install, LazyVim loads, startup prints no errors, the user keymap layer is active, no plugin failed to load | Not used interactively. The container test does not exercise the UI, completion or Treesitter highlighting by eye |
+| Language extras and Mason bootstrap | implemented, verification pending | Extras for Python, JSON, Markdown, TOML and YAML are enabled and load in container | Mason installs language servers on first use of a file type, that step was not run. Manual check: open a `.py` file and confirm the server attaches |
+| Markdown rendering in the editor | implemented, verification pending | The LazyVim markdown extra loads in container | Rendering was not looked at. Manual check: open a `.md` file and confirm headings and code blocks render |
+| `NVIM_APPNAME` separation from the previous configuration | tested | Tested in container: the configuration uses only `welleng-nvim` directories, and the `uninstall.sh` test leaves unrelated files alone | The new configuration is not the default `nvim`, switching it is the maintainer's decision, see ADR 0017. Not run next to the real `~/.config/nvim` |
 
 ## Phase 3 - Git workflow
 
@@ -112,9 +112,9 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| Remote Control helpers | planned | - | Not available for sessions routed to another provider |
-| Port-diff security check | planned | - | |
-| Manual phone verification procedure | planned | - | Needs a real device |
+| Remote Control helpers: `welleng rc` | implemented, verification pending | Arch: unit tests for the tmux command, which refuses `bypassPermissions`, and the outside-tmux error | `claude remote-control` was not started, so no phone ever connected. Procedure: `docs/verification/phone.md`. Not available for sessions routed to another provider |
+| Port-diff security check: `welleng rc --ports snapshot` and `diff` | tested | Arch: unit tests for parsing and the exposed or loopback split, and a live snapshot and diff on the real machine reported `ok` | Linux with `ss` only. It has not yet been run around a real Remote Control start |
+| Manual phone verification procedure | implemented, verification pending | Written, see `docs/verification/phone.md` | Needs a real device |
 
 ## Phase 8 - Effort recommendations
 
@@ -130,7 +130,7 @@ Anything that needs a device or an operating system that has not been reached is
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
 | PowerShell profile and WezTerm configuration | planned | - | |
-| WSL2 guide | planned | - | Needs a WSL2 host to verify |
-| Native Windows fallback notes | planned | - | Best effort |
-| Uninstall and rollback | planned | - | |
-| Troubleshooting guide | planned | - | |
+| WSL2 guide and verification procedure | implemented, verification pending | Written, see `docs/verification/wsl2.md` | Needs a WSL2 host to verify |
+| `bootstrap/install.ps1` and the native Windows procedure | implemented, verification pending | Written, never run, see `docs/verification/windows.md` | Best effort, needs a Windows host |
+| Uninstall and rollback: `scripts/uninstall.sh` and `wire-in.sh --undo` | tested | Arch container: dry run changes nothing, `--yes` removes deployed files, keeps `secrets.env` and the user's own files, and restores the user's zshrc, tmux and ssh files byte for byte | The `uv tool` and plugin removal steps ran only as dry-run text on the real machine |
+| Troubleshooting guide | implemented | Written from the problems met while building this, `docs/troubleshooting.md` | Entries were not tried by a second person |

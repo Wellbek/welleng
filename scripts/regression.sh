@@ -3,7 +3,7 @@
 # end-to-end home test.
 #   scripts/regression.sh              host stages, container stage when docker is available
 #   scripts/regression.sh --quick      host stages only, no container
-#   scripts/regression.sh --matrix     also run the bootstrap end-to-end test on Ubuntu, Fedora and Arch containers
+#   scripts/regression.sh --matrix     also run the slow container tests: bootstrap on Ubuntu, Fedora and Arch, and the Neovim configuration
 #   scripts/regression.sh --strict     a skipped stage counts as a failure (use in CI and before release)
 # Every stage ends as PASS, FAIL or SKIP, and the exit code is non-zero on any FAIL.
 # The stage_* functions are called indirectly by run_stage, so ShellCheck cannot see the calls.
@@ -99,6 +99,7 @@ if [ "$matrix" -eq 1 ]; then
   for distro in ubuntu fedora arch; do
     run_stage "bootstrap end-to-end on $distro" scripts/distro-container.sh "$distro" tests/e2e/bootstrap.sh
   done
+  run_stage "Neovim configuration end-to-end" scripts/nvim-container.sh
 fi
 
 printf '\n== summary\n'

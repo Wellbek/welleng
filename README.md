@@ -6,9 +6,10 @@ It installs from a single Git repository, keeps the editor, multiplexer, Git too
 
 ## Status
 
-**Pre-implementation.**
-The repository currently holds the foundations: repository hygiene, secret scanning, CI, decision records, the security and platform policies, the agent instructions for working on the project, the credentials example with its on-demand loader, and the list of `ecc` plugin features that are disabled to avoid conflicts.
-No part of the environment itself is installed or implemented yet.
+**Early implementation, Linux first.**
+Working today, tested on Arch Linux and in Ubuntu, Fedora and Arch containers: the installer and its pinned releases, the chezmoi source state, an opt-in shell integration, the `welleng` commands listed below, the Claude Code plugin with the `/harness` skill and effort hints, a Neovim configuration, a reversible wire-in and uninstall, and a regression harness with security checks.
+Not yet verified: native Windows, WSL2, macOS, a phone connected through Remote Control, and interactive use of the hints and the `/harness` skill.
+`docs/verification/` holds the manual procedure for each of those.
 
 [CHECKLIST.md](CHECKLIST.md) is the single source of truth for what exists and what has been verified, per platform.
 Every feature described below is **planned** unless the checklist says otherwise.
@@ -241,7 +242,7 @@ Every push and pull request runs:
 ## The `welleng` command line
 
 A small Python package run through `uv`, identical on Linux and Windows.
-`welleng doctor`, `keys`, `repos`, `harness`, `agents`, `ssh` and `hints` exist, every other command below is **planned**.
+`welleng doctor`, `keys`, `repos`, `harness`, `agents`, `ssh`, `hints` and `rc` exist, every other command below is **planned**.
 
 | Command | Purpose |
 |---|---|
@@ -275,10 +276,16 @@ tests/                        security policy checks and the end-to-end home tes
 scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code settings
 packages/packages.toml        logical package name to package id per platform
 packages/releases.toml        pinned release archives with SHA-256 for tools without a package
-bootstrap/                    install.sh, plan.py and install_release.py
+bootstrap/                    install.sh, install.ps1 (not yet run), plan.py and install_release.py
 claude-plugin/                the welleng Claude Code plugin: /harness skill and a SessionStart suggestion
 scripts/distro-container.sh   run a command in a clean Ubuntu, Fedora or Arch container
-tools/                        the welleng Python package (`doctor`, `keys`, `repos`, `harness`, `agents`, `ssh`, `hints`) with pytest tests
+scripts/nvim-container.sh     test the Neovim configuration in a container
+scripts/wire-in.sh            reversible connection to an existing zsh, tmux and ssh setup
+scripts/uninstall.sh          dry-run-first removal of everything this project added
+home/dot_config/welleng-nvim/ LazyVim configuration, run as NVIM_APPNAME=welleng-nvim
+docs/verification/            manual procedures for Windows, WSL2, phone and interactive checks
+docs/troubleshooting.md       known problems and fixes
+tools/                        the welleng Python package (`doctor`, `keys`, `repos`, `harness`, `agents`, `ssh`, `hints`, `rc`) with pytest tests
 .chezmoiroot                  points chezmoi at home/
 home/                         chezmoi source state: tmux and git config, tpm, welleng config
 CLAUDE.md                     agent instructions for this repository
@@ -291,8 +298,7 @@ docs/platforms.md             platform tiers and verification policy
 Planned, not created yet:
 
 ```
-bootstrap/                    install.ps1 and the uninstall scripts
-home/                         the rest of the chezmoi source state: zsh, starship, kitty, yazi, lazygit, Neovim
+home/                         the rest of the chezmoi source state: kitty, yazi
 ```
 
 ## Platform support
@@ -356,12 +362,15 @@ The full instructions are in [docs/security.md](docs/security.md#setting-up-cred
 If you use the `ecc` Claude Code plugin, run `python3 scripts/apply-ecc-overrides.py --dry-run` to preview which of its features are disabled because they conflict with this project, then run it without `--dry-run` to apply them.
 The reasons are in [ADR 0011](docs/adr/0011-avoid-overlap-with-the-ecc-plugin.md).
 
-The planned fresh-machine flow, none of which exists yet:
+The fresh-machine flow, tested in Ubuntu, Fedora and Arch containers but not on a real fresh machine:
 
-1. Install `git` and `curl`, or use `winget` on Windows.
-2. Run the bootstrap script, which installs `chezmoi` and `uv` and then applies the configuration.
-3. Run `welleng doctor` and follow its install hints.
-4. Sign in to Claude Code and GitHub, and add your own SSH hosts and secrets.
+1. Install `git` and Python 3.11 or newer, or use WSL2 on Windows.
+2. Run `bootstrap/install.sh --dry-run` to see the plan, then `bootstrap/install.sh`, which installs the tools from the package map and verified release archives.
+3. Run `chezmoi init --apply --source <repository>` to deploy the configuration, or rerun the installer with `--chezmoi`.
+   Use a chezmoi target path, for example `~/.config/welleng`, to deploy only part of it.
+4. Run `uv tool install --editable tools` to get the `welleng` command, then `welleng doctor`.
+5. Optional: `scripts/wire-in.sh --dry-run` then `scripts/wire-in.sh` to connect an existing zsh, tmux and SSH setup, and `claude plugin marketplace add <repository>` with `claude plugin install welleng@welleng-local` for the plugin.
+6. Sign in to Claude Code and GitHub, and add your own SSH hosts and secrets.
 
 ## Roadmap
 
@@ -401,7 +410,8 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 
 ## Known limitations
 
-- Nothing in the environment itself is implemented yet.
+- Native Windows, WSL2 and macOS have never been run, see `docs/verification/`.
+- `welleng up`, `welleng update`, kitty and yazi configuration are not written yet.
 - A literal "press Enter to skip" is impossible in Claude Code's input, because an empty prompt is ignored.
 - Remote Control cannot control sessions routed to another provider.
 - A terminal cannot match a graphical diff editor exactly.
