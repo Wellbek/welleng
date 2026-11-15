@@ -148,7 +148,7 @@ jobs:
       - name: welleng doctor and its tests
         shell: pwsh
         run: |
-          python -m pip install --quiet ./tools pytest
+          python -m pip install --quiet --editable ./tools pytest
           python -m welleng.cli doctor --packages packages/packages.toml
           # Exit code 1 means a mandatory tool is missing on the runner, which is expected, anything higher is a crash.
           if ($LASTEXITCODE -gt 1) { exit $LASTEXITCODE }
