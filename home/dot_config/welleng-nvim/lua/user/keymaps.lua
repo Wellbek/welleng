@@ -3,3 +3,5 @@ local map = vim.keymap.set
 map("n", "<leader>wk", function()
   vim.cmd("terminal welleng keys")
 end, { desc = "welleng keymap cheatsheet" })
+
+require("user.claude").setup()
