@@ -32,3 +32,4 @@ Claims in these records carry one of these tags so the strength of the evidence 
 | [0013](0013-effort-only-hints.md) | Effort-only hints | Accepted |
 | [0014](0014-pinned-release-archives-for-tools-without-packages.md) | Pinned release archives for tools without a package | Accepted |
 | [0015](0015-opt-in-shell-integration.md) | Opt-in shell integration that never edits existing files | Accepted |
+| [0016](0016-behaviour-preserving-wire-in.md) | Wiring into an existing setup must preserve behaviour | Accepted |

@@ -84,13 +84,21 @@ Anything that needs a device or an operating system that has not been reached is
 | `/harness` questionnaire skill with a plan-of-changes preview | implemented, verification pending | - | The skill text validates, but no live session has run the questionnaire. Manual check: install the plugin, run `/harness` in a throwaway repository and confirm nothing is written before approval. It needs `welleng` on PATH, install with `uv tool install` from `tools/` |
 | `welleng harness plan`, `apply` and `check` | tested | Arch: 9 unit tests: plan writes nothing, apply is idempotent, existing JSON and Markdown are preserved, managed blocks replace only their own text, credentials and literal MCP env values are refused, invalid JSON is never overwritten, `apply` needs `--yes` | Hook commands are checked for existence and the executable bit only, not run |
 
+## Cross-cutting: connecting to an existing setup
+
+| Feature | Status | Tested on | Known limitations |
+|---|---|---|---|
+| Wire-in `scripts/wire-in.sh` and `tests/e2e/wire-in.sh` | tested | Arch container with copies of the maintainer's real zshrc, tmux and ssh config, and with synthetic files: 23 checks each, covering dry run, idempotence, `ssh -G` identical for every host, tmux prefix and errors unchanged, zsh status, errors, aliases, exports and key bindings unchanged, exact restore by `--undo`. Then applied on the real machine with the same before and after comparison `[verified: Arch]` | The comparison uses a non-interactive `zsh -i -c`, an interactive session is not proven identical. Not run on other distributions or macOS |
+| Installed on the maintainer machine: `welleng` through `uv tool install --editable`, chezmoi from a pinned release, `~/.config/welleng` deployed, the three blocks wired, the plugin installed from the local marketplace | tested | Arch, real machine: `welleng` runs from PATH, `welleng agents --count` works, `claude plugin list` shows the plugin enabled | The tmux segment is not active in already-running tmux servers until their config is reloaded |
+| Plugin hooks in a live session | tested | Arch, headless `claude -p` on 2.1.325: `SessionStart` ran and produced the JSON, `UserPromptSubmit` ran with exit 0 | Interactive sessions are not exercised. The hook input carried no `effort` field in headless mode, so hints stay silent there, see ADR 0016 |
+
 ## Phase 5 - Agent monitoring
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
 | Hook and status line state writer | planned | - | |
 | `welleng agents` dashboard, base layer | tested | Arch: 8 unit tests with synthetic data, and a live run against `claude agents --json` on Claude Code 2.1.325 `[verified: Arch]` | Shows state, project, name, kind and age only. Model, effort, context and cost need the hook state writer, and there is no interactive jump or terminate yet |
-| `welleng agents --count` for a tmux status segment | tested | Arch: prints the waiting count, or `?` when `claude` fails | The tmux config does not call it yet, wiring it in changes the deployed tmux file and is still to do |
+| `welleng agents --count` for a tmux status segment | tested | Arch: prints the waiting count or `?`, and the segment is wired through `tmux-agents.conf`, a loaded config shows it in `status-right` | Only visible in a tmux server that reloaded the config, and the interactive look was not checked |
 | Contract test against the installed `claude` | tested | Arch, Claude Code 2.1.325: the real `claude agents --json` output parses and every state maps to a known value | Covers `agents --json` only, not the hook or status line payloads. Skipped automatically where `claude` is not installed, including CI |
 
 ## Phase 6 - Remote machine registry
@@ -112,7 +120,7 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| Local scorer in the prompt hook, effort level only | implemented, verification pending | Arch: 10 unit and subprocess tests of the scorer and hook, `claude plugin validate` passes. The hook was fed synthetic events, not run in a live session | Accuracy on real prompts is unmeasured, the keyword lists are a first guess to tune from the log. The "first prompt after a completed turn" condition of ADR 0013 is not implemented, the cooldown stands in for it. Manual check: run a session at `/effort high`, send `rename foo to bar`, and confirm one user-only hint appears |
+| Local scorer in the prompt hook, effort level only | implemented, verification pending | Arch: 10 unit and subprocess tests of the scorer and hook, `claude plugin validate` passes. The hook ran silently in a live headless session, which carried no effort level | Accuracy on real prompts is unmeasured, the keyword lists are a first guess to tune from the log. The "first prompt after a completed turn" condition of ADR 0013 is not implemented, the cooldown stands in for it. Manual check: run a session at `/effort high`, send `rename foo to bar`, and confirm one user-only hint appears |
 | Check that `effort.level` is the effective level in a real session | planned | - | Matters on models that fall back from `xhigh` to `high` |
 | Hint delivery by `systemMessage`, cooldown, snooze and off switch | tested | Arch: cooldown, snooze, off, `ultrathink`, missing effort level and low confidence all stay silent in tests, and the hook prints a single JSON object | No status line segment yet, `systemMessage` rendering in a live session is unverified `[spike]` |
 | Recommendation log and `welleng hints report` | tested | Arch: the log holds estimate and levels only, a test asserts the prompt text is never written | Acceptance detection from later effort changes is not implemented |

@@ -92,6 +92,9 @@ run_stage "package map parses" stage_packages
 run_stage "Claude Code plugin validates" stage_plugin
 run_stage "Python unit tests" stage_python
 run_stage "end-to-end home test" stage_e2e
+if [ "$quick" -eq 0 ] && command -v docker >/dev/null 2>&1; then
+  run_stage "wire-in end-to-end" scripts/chezmoi-container.sh tests/e2e/wire-in.sh
+fi
 if [ "$matrix" -eq 1 ]; then
   for distro in ubuntu fedora arch; do
     run_stage "bootstrap end-to-end on $distro" scripts/distro-container.sh "$distro" tests/e2e/bootstrap.sh

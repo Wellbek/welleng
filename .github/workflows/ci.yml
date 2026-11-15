@@ -81,7 +81,7 @@ jobs:
     container: archlinux:latest
     steps:
       - name: Install tools
-        run: pacman -Syu --noconfirm --needed chezmoi git tmux zsh python uv shellcheck
+        run: pacman -Syu --noconfirm --needed chezmoi git tmux zsh python uv shellcheck openssh diffutils starship zoxide fzf fd
       - uses: actions/checkout@v4
       - name: Allow git in the container
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -91,6 +91,8 @@ jobs:
         run: cd tools && uv run --quiet pytest -q
       - name: End-to-end home test
         run: tests/e2e/home.sh
+      - name: Wire-in end-to-end test
+        run: tests/e2e/wire-in.sh
 
   bootstrap:
     name: Bootstrap (${{ matrix.distro }})
