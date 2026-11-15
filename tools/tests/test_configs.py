@@ -16,7 +16,7 @@ def test_kitty_config_loads_and_applies_values(tmp_path):
         "print(o.scrollback_lines, o.copy_on_select, o.macos_option_as_alt)"
     )
     env = {"HOME": str(tmp_path), "XDG_CONFIG_HOME": str(tmp_path), "PATH": "/usr/bin:/bin"}
-    out = subprocess.run(["kitty", "+runpy", code], capture_output=True, text=True, env=env, check=False, timeout=60)
+    out = subprocess.run([shutil.which("kitty"), "+runpy", code], capture_output=True, text=True, env=env, check=False, timeout=60)
     assert out.returncode == 0, out.stderr
     assert out.stdout.split()[:2] == ["20000", "clipboard"]
 
@@ -24,7 +24,7 @@ def test_kitty_config_loads_and_applies_values(tmp_path):
 @pytest.mark.skipif(shutil.which("yazi") is None, reason="yazi not installed")
 def test_yazi_config_parses_without_errors(tmp_path):
     env = {"HOME": str(tmp_path), "YAZI_CONFIG_HOME": str(CONFIG / "yazi"), "PATH": "/usr/bin:/bin"}
-    out = subprocess.run(["yazi", "--debug"], capture_output=True, text=True, env=env, check=False, timeout=60)
+    out = subprocess.run([shutil.which("yazi"), "--debug"], capture_output=True, text=True, env=env, check=False, timeout=60)
     text = out.stdout + out.stderr
     assert "invalid type" not in text and "unknown field" not in text and "expected" not in text, text
 

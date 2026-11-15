@@ -12,6 +12,18 @@ def git(path: Path, *args: str) -> None:
     subprocess.run(["git", "-C", str(path), *args], check=True, capture_output=True, env={**os.environ, **ENV})
 
 
+def git_only_path(tmp_path: Path) -> str:
+    """A PATH holding git and nothing else, so no real chezmoi is found whatever the machine has installed."""
+    import shutil
+
+    directory = tmp_path / "git-only-bin"
+    directory.mkdir(exist_ok=True)
+    link = directory / "git"
+    if not link.exists():
+        link.symlink_to(shutil.which("git"))
+    return str(directory)
+
+
 def make_pair(tmp_path: Path):
     origin = tmp_path / "origin"
     origin.mkdir()
@@ -26,7 +38,7 @@ def make_pair(tmp_path: Path):
 
 def test_up_to_date_and_dry_run(tmp_path, capsys, monkeypatch):
     _, clone = make_pair(tmp_path)
-    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    monkeypatch.setenv("PATH", git_only_path(tmp_path))
     assert update.run(clone, tmp_path / "home", yes=False) == 0
     out = capsys.readouterr().out
     assert "up to date" in out and "dry run" in out
@@ -37,7 +49,7 @@ def test_new_commits_are_shown_then_pulled_only_with_yes(tmp_path, capsys, monke
     (origin / "b").write_text("2")
     git(origin, "add", "b")
     git(origin, "commit", "-q", "-m", "second change")
-    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    monkeypatch.setenv("PATH", git_only_path(tmp_path))
     assert update.run(clone, tmp_path / "home", yes=False) == 0
     assert "second change" in capsys.readouterr().out
     assert not (clone / "b").exists()
