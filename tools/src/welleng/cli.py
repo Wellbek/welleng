@@ -92,7 +92,7 @@ def main(argv: list[str] | None = None) -> int:
                 return 0
             print(f"agents: {e}", file=sys.stderr)
             return 1
-        print(agents.waiting_count(found) if args.count else agents.render(found))
+        print(agents.waiting_count(found) if args.count else agents.render(agents.enrich(found)))
         return 0
     if args.command == "update":
         repo = args.repo or (Path(os.environ["WELLENG_REPO"]) if os.environ.get("WELLENG_REPO") else _chezmoi_repo())

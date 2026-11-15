@@ -7,9 +7,10 @@ values are shown as "unknown" instead of failing.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 # Raw state strings seen from the CLI, mapped to the states shown to the user.
@@ -36,6 +37,12 @@ class Agent:
     state: str
     started_ms: int | None
     pid: int | None
+    # Filled from the hook state writer when it has run for this session, see enrich().
+    model: str | None = None
+    effort: str | None = None
+    context_pct: float | None = None
+    cost_usd: float | None = None
+    subagents: int | None = None
 
 
 class AgentsError(RuntimeError):
@@ -83,6 +90,39 @@ def fetch(timeout: float = 20.0) -> list[Agent]:
     return parse(result.stdout)
 
 
+def state_dir() -> Path:
+    base = os.environ.get("XDG_STATE_HOME") or str(Path.home() / ".local" / "state")
+    return Path(base) / "welleng" / "sessions"
+
+
+def enrich(agents: list[Agent], directory: Path | None = None) -> list[Agent]:
+    """Add model, effort, context, cost and subagent count from the hook state files, where present."""
+    directory = directory or state_dir()
+    out = []
+    for a in agents:
+        path = directory / f"{a.session_id}.json"
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, ValueError):
+            data = None
+        if not isinstance(data, dict):
+            out.append(a)
+            continue
+
+        def text(key: str) -> str | None:
+            v = data.get(key)
+            return v if isinstance(v, str) else None
+
+        def number(key: str) -> float | None:
+            v = data.get(key)
+            return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+
+        subs = data.get("subagents")
+        out.append(replace(a, model=text("model"), effort=text("effort"), context_pct=number("context_pct"),
+                           cost_usd=number("cost_usd"), subagents=len(subs) if isinstance(subs, list) else None))
+    return out
+
+
 def age(started_ms: int | None, now: float | None = None) -> str:
     if started_ms is None:
         return "?"
@@ -100,7 +140,19 @@ def waiting_count(agents: list[Agent]) -> int:
 def render(agents: list[Agent], now: float | None = None) -> str:
     if not agents:
         return "no Claude Code sessions"
-    rows = [("state", "project", "name", "kind", "age")]
-    rows += [(a.state, a.project, a.name or "-", a.kind, age(a.started_ms, now)) for a in agents]
-    widths = [max(len(r[i]) for r in rows) for i in range(5)]
+    extras = any(a.model or a.effort or a.context_pct is not None or a.cost_usd is not None for a in agents)
+    header = ("state", "project", "name", "kind", "age") + (("model", "effort", "ctx", "cost", "sub") if extras else ())
+    rows = [header]
+    for a in agents:
+        row = (a.state, a.project, a.name or "-", a.kind, age(a.started_ms, now))
+        if extras:
+            row += (
+                a.model or "-",
+                a.effort or "-",
+                f"{a.context_pct:.0f}%" if a.context_pct is not None else "-",
+                f"${a.cost_usd:.2f}" if a.cost_usd is not None else "-",
+                str(a.subagents) if a.subagents is not None else "-",
+            )
+        rows.append(row)
+    widths = [max(len(r[i]) for r in rows) for i in range(len(rows[0]))]
     return "\n".join("  ".join(c.ljust(w) for c, w in zip(r, widths)).rstrip() for r in rows)
