@@ -46,7 +46,7 @@ Anything that needs a device or an operating system that has not been reached is
 | `bootstrap/install.sh` with `--dry-run`, `--yes`, `--tiers` | tested | Tested in container: Ubuntu 24.04, Fedora latest and Arch latest, 20 checks each, covering dry run, real install, mandatory tools on PATH, idempotence and a rejected bad checksum | Never run on the maintainer host, by design. macOS and Homebrew are not run. Applying the chezmoi config is a separate opt-in flag that was not exercised here |
 | Pinned release archives: `packages/releases.toml`, `bootstrap/install_release.py`, `scripts/pin-releases.py` | tested | Tested in container (three distros) and 8 unit tests: wrong digest, non-https, path traversal, missing member, zip and tar | Linux x86_64 and aarch64 only, aarch64 digests are pinned but the binaries were not run |
 | `welleng update`: fetch, show commits and drift, then apply only `~/.config/welleng` and `~/.config/welleng-nvim` | tested | Arch: 5 unit tests with real git repositories and a stub chezmoi (dry run by default, pull only with `--yes`, dirty tree refused, apply scope limited), and a live dry run that correctly refused a dirty tree | Not run with a real chezmoi apply through this command |
-| `bootstrap/install.ps1` | planned | - | |
+| `bootstrap/install.ps1` | implemented, verification pending | Parses with PowerShell's own parser in a container and in CI, never run | Same row as in Phase 9, see `docs/verification/windows.md` |
 | tmux configuration cleanup, keeping the existing prefix | tested | Arch, tmux 3.6a, isolated server: loads without errors, prefix `M-o` kept, `h` and `l` pane keys corrected, F1 falls back to the key list, kitty detected through `KITTY_WINDOW_ID` | The Neovim navigation bindings and the plugins loaded by tpm were not exercised |
 | `welleng up`: four-window project session (edit, git, agents, shell) | tested | Arch: unit tests against a real tmux on an isolated socket (windows created, second call reuses the session, panes start in the project directory), and a live run | Implemented directly with tmux commands, not with tmuxp. Missing tools degrade to a plain shell. Attaching (`attach-session` or `switch-client`) was not exercised, only `--no-attach` |
 | Opt-in shell integration `init.zsh`, starship and lazygit (delta) config | tested | Tested in container (Arch): parses, guarded with no tools present, fd alias on Debian naming, a user's own starship config wins, lazygit config is chained | Not run in a real interactive session. The maintainer's own `~/.zshrc` is not modified, see ADR 0015 |
@@ -56,7 +56,7 @@ Anything that needs a device or an operating system that has not been reached is
 | Static security checks `tests/security/static.sh` | tested | Arch host | Policy checks on tracked files, not a replacement for a dependency or CVE scan |
 | `welleng doctor` skeleton | tested | Arch: 4 pytest tests pass, and a live run reports the real machine and exits 1 on missing mandatory tools | Looks executables up on `PATH` only, it does not check versions, and Windows is not run. Not in CI yet |
 | Linux container matrix in CI | planned | - | |
-| Windows CI job for bootstrap and `doctor` | planned | - | |
+| Windows CI job for bootstrap and `doctor` | implemented, verification pending | Written in `.github/workflows/ci.yml`, not yet run on GitHub | `continue-on-error`, because native Windows is best effort (ADR 0004). The `-DryRun` and `doctor` steps are guesses until the first run |
 
 ## Phase 2 - Neovim
 
@@ -71,17 +71,17 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| lazygit configuration with the delta pager | planned | - | |
-| gitsigns and diffview keymaps | planned | - | No terminal tool reproduces every behaviour of a graphical diff editor |
+| lazygit configuration with the delta pager | tested | Tested in container (Arch): see the opt-in shell integration row, `LG_CONFIG_FILE` is chained after the user's own file | The delta pager itself was not looked at in a real lazygit session |
+| gitsigns and diffview keymaps | tested | Tested in container (Arch, Neovim from pacman): the keys exist, and `:DiffviewOpen` opens a view on a real repository with an uncommitted change | Not used interactively. LazyVim supplies the gitsigns hunk keys. No terminal tool reproduces every behaviour of a graphical diff editor |
 | `welleng repos` multi-repository overview | tested | Arch: 4 unit tests against real throwaway git repositories (branch, staged, unstaged, untracked, ahead and behind) and a live run | Scans two levels deep, no remote fetch, so ahead and behind reflect the last fetch |
 
 ## Phase 4 - Claude Code integration and project harness
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| Global instructions managed by chezmoi | planned | - | |
+| Global instructions managed by chezmoi | implemented | Tested in container: the file is deployed under `~/.config/welleng/claude/` and no `~/.claude` is created. A unit test checks the rules (no em dash, import line) | Opt-in through one `@` import line in the user's own `~/.claude/CLAUDE.md`, a live Claude Code session has not loaded it |
 | `welleng` Claude Code plugin skeleton | tested | Arch: `claude plugin validate` passes on Claude Code 2.1.325, and the SessionStart hook is exercised by piping events (suggests once in a bare git repo, silent when configured, on resume, outside a repo or on garbage input) | The hook was not run inside a live Claude Code session, so how its `additionalContext` is presented is unverified. The plugin has not been installed from a marketplace |
-| claudecode.nvim bridge and contextual prompt keys | planned | - | |
+| claudecode.nvim bridge and contextual prompt keys | implemented, verification pending | Tested in container: the keys exist in normal and visual mode, and the pane detection logic is unit tested (own pane excluded, `claude` and version-number commands matched). A `claude` pane appears as `claude` in tmux on Arch `[verified: Arch]` | The send, type and focus flow with a live `claude --ide` session was not run, see ADR 0019 and `docs/verification/interactive.md` |
 | `/harness` questionnaire skill with a plan-of-changes preview | implemented, verification pending | - | The skill text validates, but no live session has run the questionnaire. Manual check: install the plugin, run `/harness` in a throwaway repository and confirm nothing is written before approval. It needs `welleng` on PATH, install with `uv tool install` from `tools/` |
 | `welleng harness plan`, `apply` and `check` | tested | Arch: 9 unit tests: plan writes nothing, apply is idempotent, existing JSON and Markdown are preserved, managed blocks replace only their own text, credentials and literal MCP env values are refused, invalid JSON is never overwritten, `apply` needs `--yes` | Hook commands are checked for existence and the executable bit only, not run |
 
@@ -97,8 +97,8 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| Hook and status line state writer | planned | - | |
-| `welleng agents` dashboard, base layer | tested | Arch: 8 unit tests with synthetic data, and a live run against `claude agents --json` on Claude Code 2.1.325 `[verified: Arch]` | Shows state, project, name, kind and age only. Model, effort, context and cost need the hook state writer, and there is no interactive jump or terminate yet |
+| Hook and status line state writer | implemented, verification pending | Arch: 12 subprocess and unit tests: nothing printed, mode 600 files, prompt text and transcript path never written, subagent ids tracked, hostile session ids ignored, stale files pruned, `SessionEnd` cleanup | No live Claude Code session has produced these files, see ADR 0018. The status line is an opt-in that the plugin does not set |
+| `welleng agents` dashboard, base layer | tested | Arch: 8 unit tests with synthetic data, and a live run against `claude agents --json` on Claude Code 2.1.325 `[verified: Arch]` | Shows state, project, name, kind and age from the CLI, plus model, effort, context, cost and subagents from the state writer when it has data (tested with synthetic state files). There is no interactive jump or terminate yet |
 | `welleng agents --count` for a tmux status segment | tested | Arch: prints the waiting count or `?`, and the segment is wired through `tmux-agents.conf`, a loaded config shows it in `status-right` | Only visible in a tmux server that reloaded the config, and the interactive look was not checked |
 | Contract test against the installed `claude` | tested | Arch, Claude Code 2.1.325: the real `claude agents --json` output parses and every state maps to a known value | Covers `agents --json` only, not the hook or status line payloads. Skipped automatically where `claude` is not installed, including CI |
 
@@ -107,7 +107,7 @@ Anything that needs a device or an operating system that has not been reached is
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
 | `welleng ssh` list, add, remove | tested | Arch: 11 unit tests in temporary directories with fake hosts: round trip, mode 600 fragments, hand-written entries listed but never removed, config injection through newlines, spaces, quotes and comments rejected, duplicates rejected | No `edit` command yet, remove and add again. No interactive picker. Not run against the real `~/.ssh` and not tested through an actual `ssh` connection |
-| One-time `Include` migration of the SSH config | planned | - | |
+| One-time `Include` migration: `welleng ssh migrate` | tested | Arch: 6 unit tests in temporary directories: dry run by default, line placed first, backup kept, mode 600, idempotent, existing Include recognised, exact `--undo`, symlinked config. `ssh -G` resolves a hand-written host identically before and after and finds a managed host | Not run against the real `~/.ssh`. The real `ssh` check substitutes an absolute path, because a relative Include resolves against the real `~/.ssh` |
 
 ## Phase 7 - Mobile access
 
@@ -130,7 +130,7 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| PowerShell profile and WezTerm configuration | planned | - | |
+| PowerShell profile and WezTerm configuration | implemented, verification pending | The profile parses and runs with stub tools in a PowerShell 7 container on Linux (guards, `y` changes directory, lazygit config chained). The WezTerm file passes a Lua syntax check | Never run on Windows, and WezTerm itself was not started. Both are opt-in and Windows-only through `.chezmoiignore` |
 | WSL2 guide and verification procedure | implemented, verification pending | Written, see `docs/verification/wsl2.md` | Needs a WSL2 host to verify |
 | `bootstrap/install.ps1` and the native Windows procedure | implemented, verification pending | Parses with PowerShell's own parser in a container, and in CI. Never run, see `docs/verification/windows.md` | Best effort, needs a Windows host |
 | Uninstall and rollback: `scripts/uninstall.sh` and `wire-in.sh --undo` | tested | Arch container: dry run changes nothing, `--yes` removes deployed files, keeps `secrets.env` and the user's own files, and restores the user's zshrc, tmux and ssh files byte for byte | The `uv tool` and plugin removal steps ran only as dry-run text on the real machine |

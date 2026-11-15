@@ -51,9 +51,9 @@ Existing today:
 - `.githooks/` pre-commit gate
 - `packages/packages.toml` the package map, checked against pacman, apt and dnf in CI
 - `bootstrap/` installer and pinned releases, `claude-plugin/` the plugin with the `/harness` skill, `tools/` the `welleng` Python package
-- `.chezmoiroot` and `home/` the chezmoi source state: tmux and git config, the tpm external, `dot_config/welleng/` (credentials example, shell helpers, starship, lazygit, tmux segment, `ecc` overrides) and `dot_config/welleng-nvim/`
+- `.chezmoiroot` and `home/` the chezmoi source state: tmux and git config, the tpm external, `dot_config/welleng/` (credentials example, shell helpers, starship, lazygit, kitty, yazi, global Claude instructions, tmux segment, `ecc` overrides), `dot_config/welleng-nvim/`, and the Windows-only `Documents/PowerShell/` and `dot_config/wezterm/`
 - `scripts/wire-in.sh`, `scripts/uninstall.sh`, `docs/verification/` and `docs/troubleshooting.md`
 
 Planned, not created yet:
 
-- the rest of `home/` (kitty, yazi), and everything in `docs/verification/` that needs a device
+- everything in `docs/verification/` that needs a device, and the checks that need a live interactive Claude Code session

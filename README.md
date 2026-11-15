@@ -192,7 +192,7 @@ A Claude Code plugin ships a `/harness` skill that sets up a project's agent con
 **Decision:** OpenSSH config is the registry, see [ADR 0007](docs/adr/0007-openssh-config-as-machine-registry.md).
 
 - `welleng ssh` lists hosts with tags and description and previews the effective settings from `ssh -G`.
-- `welleng ssh add`, `edit` and `rm` manage fragments under `~/.ssh/config.d/`, and hand-edited entries are never rewritten.
+- `welleng ssh add` and `rm` manage fragments under `~/.ssh/config.d/`, and hand-edited entries are never rewritten.
 - Hosts, addresses and usernames are local and never tracked in this repository.
 
 ### Mobile access
@@ -249,7 +249,7 @@ All commands below exist except `welleng up` attaching in every setup, which is 
 | `welleng` or `welleng up [path]` | Open or attach to the project session, or pick a project when outside one |
 | `welleng repos [root]` | Multi-repository overview with branch, staged, unstaged and untracked counts, ahead and behind, and last commit |
 | `welleng agents` | Central view of Claude sessions, with `--count` for the tmux segment |
-| `welleng ssh [add\|edit\|rm\|ls]` | Pick and manage machines from the SSH config |
+| `welleng ssh [add\|rm\|ls\|migrate]` | Manage machines from the SSH config, `migrate` adds the one-time `Include` line (dry run unless `--yes`, `--undo` reverses it) |
 | `welleng keys` | Generated, searchable keybinding cheatsheet |
 | `welleng doctor` | Report mandatory, recommended and optional components, failing only on missing mandatory ones |
 | `welleng harness check` | Validate generated project configuration |
@@ -293,12 +293,6 @@ CHECKLIST.md                  verification status per feature and platform
 docs/adr/                     architecture decision records
 docs/security.md              secrets and remote access model
 docs/platforms.md             platform tiers and verification policy
-```
-
-Planned, not created yet:
-
-```
-home/                         the rest of the chezmoi source state: kitty, yazi
 ```
 
 ## Platform support
@@ -411,7 +405,7 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 ## Known limitations
 
 - Native Windows, WSL2 and macOS have never been run, see `docs/verification/`.
-- kitty and yazi configuration are not written yet.
+- The WezTerm and PowerShell configuration is written, parsed and exercised with stubs, but never run on Windows.
 - A literal "press Enter to skip" is impossible in Claude Code's input, because an empty prompt is ignored.
 - Remote Control cannot control sessions routed to another provider.
 - A terminal cannot match a graphical diff editor exactly.
