@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
-from . import doctor, keys, repos
+from . import doctor, harness, keys, repos
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -19,6 +20,16 @@ def main(argv: list[str] | None = None) -> int:
     k.add_argument("--tmux-conf", type=Path, default=Path.home() / ".tmux.conf")
     r = sub.add_parser("repos", help="branch and change overview of the git repositories under a root")
     r.add_argument("root", nargs="?", type=Path, default=Path.cwd())
+    h = sub.add_parser("harness", help="plan, apply and check a project's Claude Code configuration")
+    hs = h.add_subparsers(dest="action", required=True)
+    for action in ("plan", "apply"):
+        sp = hs.add_parser(action)
+        sp.add_argument("spec", type=Path)
+        sp.add_argument("--project", type=Path, default=Path.cwd())
+        if action == "apply":
+            sp.add_argument("--yes", action="store_true", help="required, the plan must have been approved")
+    hc = hs.add_parser("check")
+    hc.add_argument("project", nargs="?", type=Path, default=Path.cwd())
     args = parser.parse_args(argv)
 
     if args.command == "doctor":
@@ -37,7 +48,38 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(repos.overview(args.root.resolve()))
         return 0
+    if args.command == "harness":
+        return _harness(args)
     return 2
+
+
+def _harness(args) -> int:
+    if args.action == "check":
+        problems = harness.check(args.project.resolve())
+        for p in problems:
+            print(p)
+        print("harness check: ok" if not problems else f"harness check: {len(problems)} problem(s)")
+        return 1 if problems else 0
+    root = args.project.resolve()
+    try:
+        changes = harness.plan(json.loads(args.spec.read_text(encoding="utf-8")), root)
+    except (harness.SpecError, json.JSONDecodeError, OSError) as e:
+        print(f"harness: {e}", file=sys.stderr)
+        return 1
+    if not changes:
+        print("nothing to change")
+        return 0
+    if args.action == "plan" or not args.yes:
+        for c in changes:
+            print(c.diff(root))
+        if args.action == "apply":
+            print("not applied: pass --yes after reviewing the plan", file=sys.stderr)
+            return 1
+        return 0
+    harness.apply(changes)
+    for c in changes:
+        print(f"wrote {c.path.relative_to(root)}")
+    return 0
 
 
 if __name__ == "__main__":

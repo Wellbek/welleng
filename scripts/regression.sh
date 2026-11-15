@@ -67,6 +67,10 @@ stage_python() {
   need uv || return 77
   (cd tools && uv run --quiet pytest -q)
 }
+stage_plugin() {
+  need claude || return 77
+  claude plugin validate claude-plugin
+}
 stage_packages() { python3 -I -c "import tomllib,sys; d=tomllib.load(open('packages/packages.toml','rb')); sys.exit(0 if d['package'] else 1)"; }
 stage_e2e() {
   if [ "$quick" -eq 1 ]; then echo "--quick given"; return 77; fi
@@ -85,6 +89,7 @@ run_stage "secret scan of the working tree" stage_secrets
 run_stage "shell syntax and ShellCheck" stage_shell
 run_stage "security policy checks" stage_security
 run_stage "package map parses" stage_packages
+run_stage "Claude Code plugin validates" stage_plugin
 run_stage "Python unit tests" stage_python
 run_stage "end-to-end home test" stage_e2e
 if [ "$matrix" -eq 1 ]; then
