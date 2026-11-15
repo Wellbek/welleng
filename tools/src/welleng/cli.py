@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import agents, doctor, harness, keys, repos
+from . import agents, doctor, harness, keys, repos, ssh
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -22,6 +22,20 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("root", nargs="?", type=Path, default=Path.cwd())
     a = sub.add_parser("agents", help="central view of Claude Code sessions")
     a.add_argument("--count", action="store_true", help="print only the number of sessions waiting for you")
+    s = sub.add_parser("ssh", help="machine registry on top of the OpenSSH config")
+    s.add_argument("--dir", type=Path, default=None, help="fragment directory, default ~/.ssh/config.d")
+    ss = s.add_subparsers(dest="action", required=True)
+    ss.add_parser("ls")
+    sa = ss.add_parser("add")
+    sa.add_argument("name")
+    sa.add_argument("hostname")
+    sa.add_argument("--user")
+    sa.add_argument("--port", type=int)
+    sa.add_argument("--identity", help="path to a private key, only the path is stored")
+    sa.add_argument("--jump")
+    sa.add_argument("--description")
+    sr = ss.add_parser("rm")
+    sr.add_argument("name")
     h = sub.add_parser("harness", help="plan, apply and check a project's Claude Code configuration")
     hs = h.add_subparsers(dest="action", required=True)
     for action in ("plan", "apply"):
@@ -60,6 +74,22 @@ def main(argv: list[str] | None = None) -> int:
             print(f"agents: {e}", file=sys.stderr)
             return 1
         print(agents.waiting_count(found) if args.count else agents.render(found))
+        return 0
+    if args.command == "ssh":
+        directory = args.dir or ssh.default_dir()
+        try:
+            if args.action == "ls":
+                main_config = Path.home() / ".ssh" / "config" if args.dir is None else None
+                print(ssh.render(ssh.list_hosts(directory, main_config)))
+            elif args.action == "add":
+                path = ssh.add(directory, args.name, args.hostname, args.user, args.port, args.identity, args.jump, args.description,
+                               Path.home() / ".ssh" / "config" if args.dir is None else None)
+                print(f"wrote {path}")
+            else:
+                print(f"removed {ssh.remove(directory, args.name)}")
+        except ssh.SshError as e:
+            print(f"ssh: {e}", file=sys.stderr)
+            return 1
         return 0
     if args.command == "harness":
         return _harness(args)

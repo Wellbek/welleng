@@ -97,7 +97,7 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| `welleng ssh` list, add, edit, remove | planned | - | |
+| `welleng ssh` list, add, remove | tested | Arch: 11 unit tests in temporary directories with fake hosts: round trip, mode 600 fragments, hand-written entries listed but never removed, config injection through newlines, spaces, quotes and comments rejected, duplicates rejected | No `edit` command yet, remove and add again. No interactive picker. Not run against the real `~/.ssh` and not tested through an actual `ssh` connection |
 | One-time `Include` migration of the SSH config | planned | - | |
 
 ## Phase 7 - Mobile access
