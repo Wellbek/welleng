@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
-from . import agents, doctor, harness, hints, keys, rc, repos, ssh
+from . import agents, doctor, harness, hints, keys, rc, repos, ssh, up, update
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -36,6 +38,13 @@ def main(argv: list[str] | None = None) -> int:
     sa.add_argument("--description")
     sr = ss.add_parser("rm")
     sr.add_argument("name")
+    up2 = sub.add_parser("update", help="pull the repository, show the changes, then apply the owned config directories")
+    up2.add_argument("--repo", type=Path, default=None, help="repository path, default $WELLENG_REPO or the chezmoi source")
+    up2.add_argument("--yes", action="store_true", help="apply, without it nothing changes")
+    u = sub.add_parser("up", help="open or attach to the project tmux session")
+    u.add_argument("path", nargs="?", type=Path, default=Path.cwd())
+    u.add_argument("--no-attach", action="store_true", help="create the session and print its name")
+    u.add_argument("--socket", help="tmux socket name, for tests")
     r2 = sub.add_parser("rc", help="start Remote Control in a tmux window, or check the listening ports")
     r2.add_argument("--name")
     r2.add_argument("--ports", choices=["snapshot", "diff"], help="snapshot listeners before starting, diff afterwards")
@@ -81,6 +90,14 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(agents.waiting_count(found) if args.count else agents.render(found))
         return 0
+    if args.command == "update":
+        repo = args.repo or (Path(os.environ["WELLENG_REPO"]) if os.environ.get("WELLENG_REPO") else _chezmoi_repo())
+        if repo is None or not (repo / ".git").exists():
+            print("update: give the repository with --repo or WELLENG_REPO", file=sys.stderr)
+            return 1
+        return update.run(repo.resolve(), Path.home(), args.yes)
+    if args.command == "up":
+        return up.up(args.path, socket=args.socket, attach=not args.no_attach)
     if args.command == "rc":
         if args.ports:
             directory = hints.state_dir()
@@ -134,6 +151,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "harness":
         return _harness(args)
     return 2
+
+
+def _chezmoi_repo() -> Path | None:
+    """The repository root behind chezmoi's source directory (.chezmoiroot points at home/)."""
+    try:
+        out = subprocess.run(["chezmoi", "source-path"], capture_output=True, text=True, check=False).stdout.strip()
+    except FileNotFoundError:
+        return None
+    if not out:
+        return None
+    path = Path(out)
+    return path.parent if path.name == "home" else path
 
 
 def _harness(args) -> int:
