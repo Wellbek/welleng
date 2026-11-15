@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import agents, doctor, harness, keys, repos, ssh
+from . import agents, doctor, harness, hints, keys, repos, ssh
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -36,6 +36,9 @@ def main(argv: list[str] | None = None) -> int:
     sa.add_argument("--description")
     sr = ss.add_parser("rm")
     sr.add_argument("name")
+    hi = sub.add_parser("hints", help="control and review effort recommendations")
+    hi.add_argument("action", choices=["snooze", "off", "on", "report"])
+    hi.add_argument("--hours", type=float, default=4)
     h = sub.add_parser("harness", help="plan, apply and check a project's Claude Code configuration")
     hs = h.add_subparsers(dest="action", required=True)
     for action in ("plan", "apply"):
@@ -74,6 +77,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"agents: {e}", file=sys.stderr)
             return 1
         print(agents.waiting_count(found) if args.count else agents.render(found))
+        return 0
+    if args.command == "hints":
+        directory = hints.state_dir()
+        if args.action == "snooze":
+            hints.snooze(directory, args.hours)
+            print(f"hints snoozed for {args.hours:g} hours")
+        elif args.action in ("off", "on"):
+            hints.set_off(directory, args.action == "off")
+            print(f"hints {args.action}")
+        else:
+            print(hints.report(directory))
         return 0
     if args.command == "ssh":
         directory = args.dir or ssh.default_dir()

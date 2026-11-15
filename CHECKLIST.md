@@ -112,10 +112,10 @@ Anything that needs a device or an operating system that has not been reached is
 
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
-| Local scorer in the prompt hook, effort level only | planned | - | Accurate for the extremes, silent in the middle by design |
+| Local scorer in the prompt hook, effort level only | implemented, verification pending | Arch: 10 unit and subprocess tests of the scorer and hook, `claude plugin validate` passes. The hook was fed synthetic events, not run in a live session | Accuracy on real prompts is unmeasured, the keyword lists are a first guess to tune from the log. The "first prompt after a completed turn" condition of ADR 0013 is not implemented, the cooldown stands in for it. Manual check: run a session at `/effort high`, send `rename foo to bar`, and confirm one user-only hint appears |
 | Check that `effort.level` is the effective level in a real session | planned | - | Matters on models that fall back from `xhigh` to `high` |
-| Status line delivery, cooldown, snooze and off switch | planned | - | |
-| Recommendation log and report | planned | - | |
+| Hint delivery by `systemMessage`, cooldown, snooze and off switch | tested | Arch: cooldown, snooze, off, `ultrathink`, missing effort level and low confidence all stay silent in tests, and the hook prints a single JSON object | No status line segment yet, `systemMessage` rendering in a live session is unverified `[spike]` |
+| Recommendation log and `welleng hints report` | tested | Arch: the log holds estimate and levels only, a test asserts the prompt text is never written | Acceptance detection from later effort changes is not implemented |
 
 ## Phase 9 - Windows, WSL2, hardening and documentation
 
