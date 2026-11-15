@@ -12,7 +12,8 @@ Not yet verified: native Windows, WSL2, macOS, a phone connected through Remote 
 `docs/verification/` holds the manual procedure for each of those.
 
 [CHECKLIST.md](CHECKLIST.md) is the single source of truth for what exists and what has been verified, per platform.
-Every feature described below is **planned** unless the checklist says otherwise.
+The design sections below describe the intended design, so treat a feature as existing only when the checklist says so.
+To use what exists today, start with the [user guides](docs/guides/README.md).
 
 ## Contents
 
@@ -246,13 +247,15 @@ All commands below exist except `welleng up` attaching in every setup, which is 
 
 | Command | Purpose |
 |---|---|
-| `welleng` or `welleng up [path]` | Open or attach to the project session, or pick a project when outside one |
+| `welleng up [path]` | Open or attach to the project session |
 | `welleng repos [root]` | Multi-repository overview with branch, staged, unstaged and untracked counts, ahead and behind, and last commit |
 | `welleng agents` | Central view of Claude sessions, with `--count` for the tmux segment |
 | `welleng ssh [add\|rm\|ls\|migrate]` | Manage machines from the SSH config, `migrate` adds the one-time `Include` line (dry run unless `--yes`, `--undo` reverses it) |
 | `welleng keys` | Generated, searchable keybinding cheatsheet |
 | `welleng doctor` | Report mandatory, recommended and optional components, failing only on missing mandatory ones |
-| `welleng harness check` | Validate generated project configuration |
+| `welleng harness plan\|apply\|check` | Preview, write and validate a project's Claude Code configuration |
+| `welleng update` | Pull the repository and apply the owned config directories |
+| `welleng rc` | Start Remote Control in tmux and check the listening ports |
 | `welleng hints [snooze\|off\|report]` | Control and review effort recommendations |
 | `welleng rc` | Start Remote Control server mode in a dedicated tmux window |
 | `welleng update` | Pull, show the drift and the diff, then apply |
@@ -277,7 +280,7 @@ scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code set
 packages/packages.toml        logical package name to package id per platform
 packages/releases.toml        pinned release archives with SHA-256 for tools without a package
 bootstrap/                    install.sh, install.ps1 (not yet run), plan.py and install_release.py
-claude-plugin/                the welleng Claude Code plugin: /harness skill and a SessionStart suggestion
+claude-plugin/                the welleng Claude Code plugin: /harness skill, hooks (suggestion, effort hints, state writer) and an opt-in status line script
 scripts/distro-container.sh   run a command in a clean Ubuntu, Fedora or Arch container
 scripts/nvim-container.sh     test the Neovim configuration in a container
 scripts/wire-in.sh            reversible connection to an existing zsh, tmux and ssh setup
@@ -291,6 +294,7 @@ home/                         chezmoi source state: tmux and git config, tpm, we
 CLAUDE.md                     agent instructions for this repository
 CHECKLIST.md                  verification status per feature and platform
 docs/adr/                     architecture decision records
+docs/guides/                  user guides: install, commands, configuration, Claude Code, terminal and editor, remote, Windows
 docs/security.md              secrets and remote access model
 docs/platforms.md             platform tiers and verification policy
 ```
@@ -327,44 +331,27 @@ See [docs/security.md](docs/security.md) for the Remote Control model and what t
 
 ## Getting started
 
-The installer does not exist yet.
-What works today is contributing to the foundations.
+The short version, on Linux or inside WSL2.
+Each step has a dry run, and the [installation guide](docs/guides/installation.md) explains all of them.
 
 ```sh
 git clone git@github.com:Wellbek/welleng.git
 cd welleng
-git config core.hooksPath .githooks   # enable the pre-commit gate
-scripts/check-hygiene.sh              # run the hygiene checks
+bootstrap/install.sh --dry-run        # see the plan, nothing changes
+bootstrap/install.sh                  # install the tools
+uv tool install --editable tools      # the welleng command
+welleng doctor                        # what is installed and what is missing
+chezmoi init --apply --source .       # deploy the configuration, read `chezmoi diff` first
+scripts/wire-in.sh --dry-run          # optional: connect an existing zsh, tmux and SSH setup
+claude plugin marketplace add .       # optional: the Claude Code plugin
+claude plugin install welleng@welleng-local
 ```
 
-Install `gitleaks` for full secret-scan coverage in the hook with `scripts/install-gitleaks.sh`.
-It installs a pinned, checksum-verified release into `~/.local/bin` without root, and CI uses the same script.
-Without `gitleaks`, the hook falls back to a shorter built-in scan and prints a warning.
+This flow is tested in clean Ubuntu, Fedora and Arch containers, and the pieces were applied on the maintainer's Arch machine.
+It has not been run on a real fresh machine, on macOS, on WSL2 or on native Windows.
+Credentials are all optional, see [configuration](docs/guides/configuration.md#credentials).
 
-Set up credentials, which are all optional:
-
-```sh
-scripts/init-secrets.sh            # creates ~/.config/welleng/secrets.env with mode 600
-scripts/init-secrets.sh --status   # shows which variables are set, never their values
-```
-
-Nothing is required.
-Claude Code signs in with `claude` then `/login`, and GitHub with `gh auth login`.
-Optional variables are `ZAI_API_KEY` for the `glm` shell function, `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` for editor providers that use API keys.
-The full instructions are in [docs/security.md](docs/security.md#setting-up-credentials).
-
-If you use the `ecc` Claude Code plugin, run `python3 scripts/apply-ecc-overrides.py --dry-run` to preview which of its features are disabled because they conflict with this project, then run it without `--dry-run` to apply them.
-The reasons are in [ADR 0011](docs/adr/0011-avoid-overlap-with-the-ecc-plugin.md).
-
-The fresh-machine flow, tested in Ubuntu, Fedora and Arch containers but not on a real fresh machine:
-
-1. Install `git` and Python 3.11 or newer, or use WSL2 on Windows.
-2. Run `bootstrap/install.sh --dry-run` to see the plan, then `bootstrap/install.sh`, which installs the tools from the package map and verified release archives.
-3. Run `chezmoi init --apply --source <repository>` to deploy the configuration, or rerun the installer with `--chezmoi`.
-   Use a chezmoi target path, for example `~/.config/welleng`, to deploy only part of it.
-4. Run `uv tool install --editable tools` to get the `welleng` command, then `welleng doctor`.
-5. Optional: `scripts/wire-in.sh --dry-run` then `scripts/wire-in.sh` to connect an existing zsh, tmux and SSH setup, and `claude plugin marketplace add <repository>` with `claude plugin install welleng@welleng-local` for the plugin.
-6. Sign in to Claude Code and GitHub, and add your own SSH hosts and secrets.
+To contribute, enable the hooks once per clone with `git config core.hooksPath .githooks`, run `scripts/check-hygiene.sh` before pushing and `scripts/regression.sh --strict` after significant changes.
 
 ## Roadmap
 
@@ -387,9 +374,12 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 
 | Document | Contents |
 |---|---|
+| [docs/guides/](docs/guides/README.md) | User guides: installation, command reference, configuration, Claude Code, terminal and editor, remote and mobile, Windows |
 | [CHECKLIST.md](CHECKLIST.md) | Feature status and the platform each was tested on |
 | [docs/adr/](docs/adr/README.md) | Architecture decision records and the evidence tags |
 | [docs/security.md](docs/security.md) | Credentials, scanning and remote access |
+| [docs/troubleshooting.md](docs/troubleshooting.md) | Fixes for problems met while building and using this |
+| [docs/verification/](docs/verification/README.md) | Manual procedures for what needs a device or a live session |
 | [docs/platforms.md](docs/platforms.md) | Tiers, capability matrix and verification rules |
 | [CLAUDE.md](CLAUDE.md) | Rules for agents working in this repository |
 

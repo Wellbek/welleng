@@ -3,8 +3,9 @@
 Well-Engineering targets Linux, WSL2 and native Windows.
 This page states what is intended for each, and is strict about what has actually been verified.
 
-Nothing below is implemented yet.
-The tables describe the target, and the verification table at the end describes how each claim will be earned.
+The Linux paths are implemented and tested on Arch and in containers, the Windows and WSL2 paths are written and not yet run.
+The tables describe the target, [CHECKLIST.md](../CHECKLIST.md) records what each platform has actually passed, and the verification table at the end describes how each claim is earned.
+For usage, see the [user guides](guides/README.md).
 
 ## Support tiers
 
