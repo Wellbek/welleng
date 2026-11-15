@@ -104,6 +104,8 @@ check "a user's own starship.toml wins" test -z "$(zrun 'print -r -- $STARSHIP_C
 rm -f "$HOME/.config/starship.toml"
 check "lazygit gets the delta config" grep -q "lazygit.yml" <<<"$(zrun 'print -r -- $LG_CONFIG_FILE')"
 check "yazi gets the welleng config directory" grep -q "/shell/../yazi$" <<<"$(zrun 'print -r -- $YAZI_CONFIG_HOME')"
+printf 'alias y=mine\n. %q\nwhence -w y\n' "$init" >"$work/probe-alias.zsh"
+check "a user's own y alias does not break init.zsh" test "$(env -i HOME="$HOME" PATH="$plain" WELLENG_SHELL_EXTRAS=1 zsh "$work/probe-alias.zsh" 2>&1)" = "y: alias"
 check "the y function exists" test "$(zrun 'whence -w y')" = "y: function"
 mkdir -p "$HOME/.config/yazi"
 check "a user's own yazi directory wins" test -z "$(zrun 'print -r -- $YAZI_CONFIG_HOME')"

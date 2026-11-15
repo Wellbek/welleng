@@ -49,7 +49,8 @@ if (( $+commands[yazi] )); then
     export YAZI_CONFIG_HOME="$_welleng_dir/../yazi"
   fi
   if ! (( $+functions[y] )) && ! (( $+aliases[y] )); then
-    y() {
+    # `function y` and not `y()`: zsh refuses to parse `y()` when the user already has an alias y.
+    function y {
       local tmp cwd
       tmp="$(mktemp -t yazi-cwd.XXXXXX)"
       command yazi "$@" --cwd-file="$tmp"
