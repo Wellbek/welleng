@@ -105,4 +105,15 @@ check "undo restores the zsh file exactly" test "$orig_z" = "$(hashof "$HOME/.zs
 check "undo restores the tmux file exactly" test "$orig_t" = "$(hashof "$HOME/.tmux.conf")"
 check "undo restores the ssh config exactly" test "$orig_s" = "$(hashof "$HOME/.ssh/config")"
 
+echo "uninstall"
+"$root/scripts/wire-in.sh" >/dev/null
+printf 'ZAI_API_KEY=fake-test-value\n' >"$HOME/.config/welleng/secrets.env"
+printf 'mine\n' >"$HOME/.config/welleng/my-own-note.txt"
+check "uninstall dry run changes nothing" bash -c "'$root/scripts/uninstall.sh' >/dev/null && test -f '$HOME/.config/welleng/shell/init.zsh' && grep -q welleng '$HOME/.zshrc'"
+check "uninstall --yes succeeds" "$root/scripts/uninstall.sh" --yes
+check "deployed files are gone" test ! -e "$HOME/.config/welleng/shell/init.zsh" -a ! -e "$HOME/.config/welleng/tmux-agents.conf"
+check "secrets.env is kept" test -f "$HOME/.config/welleng/secrets.env"
+check "the user's own file in that directory is kept" test -f "$HOME/.config/welleng/my-own-note.txt"
+check "the user's files are restored exactly" test "$orig_z$orig_t$orig_s" = "$(hashof "$HOME/.zshrc")$(hashof "$HOME/.tmux.conf")$(hashof "$HOME/.ssh/config")"
+
 finish
