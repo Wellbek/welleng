@@ -80,6 +80,15 @@ chezmoi init --apply --source <repo> \
 You can also run `bootstrap/install.sh --chezmoi` to do this as part of the install.
 To deploy only part of it, give a target path, for example `chezmoi apply ~/.config/welleng`.
 
+After a deploy from a clone, chezmoi has no default source directory, so export the clone's path for `welleng update`:
+
+```sh
+export WELLENG_REPO="$HOME/path/to/welleng"
+```
+
+The wire-in step (below) adds a managed block to your `~/.tmux.conf`, and a bare `chezmoi apply` would overwrite the file and drop that block.
+After wiring in, keep using `welleng update --yes`, which applies only `~/.config/welleng` and `~/.config/welleng-nvim`, or rerun `scripts/wire-in.sh` after any full apply.
+
 Important: `chezmoi apply` writes `~/.tmux.conf` and `~/.gitconfig`.
 If you already have those files, read the diff with `chezmoi diff` first.
 Everything else is deployed under `~/.config/welleng` and `~/.config/welleng-nvim`, which never overlap your existing files.

@@ -58,3 +58,21 @@ On a minimal container, install `ca-certificates` first, Python cannot verify ht
 
 Keep the repository on the WSL ext4 filesystem, `chmod 600` does not work under `/mnt/c`.
 Nothing here has been verified on Windows or WSL2, see `docs/verification/`.
+
+## `claude --ide` finds no Neovim
+
+The bridge plugin must be loaded when Neovim starts, because it creates the lock file that `claude --ide` looks for.
+Run `NVIM_APPNAME=welleng-nvim nvim`, then `:echo exists(':ClaudeCodeSend')`, which must print 2.
+If it prints 0, the plugin spec lost its `lazy = false` setting, because a spec with `keys` is lazy by default.
+Several Neovim instances in one project make the auto-connect ambiguous, so use `/ide` to choose.
+
+## `init.zsh` prints "defining function based on alias"
+
+zsh refuses to parse a function definition `name() { ... }` when an alias with that name already exists.
+Current versions define `y` with the `function` keyword, so run `welleng update --yes` to get the fixed file.
+
+## `welleng update` says to give the repository
+
+chezmoi has no default source directory when you deployed from a clone with `--source`.
+Export `WELLENG_REPO` with the clone's path, or pass `--repo`.
+

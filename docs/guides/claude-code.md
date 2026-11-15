@@ -139,7 +139,9 @@ welleng hints report
 The log in `~/.local/state/welleng/hints.log` holds the estimate and the levels only, never the prompt text.
 `welleng hints report` also counts prompts that arrived without an effort level.
 In headless mode the hook input carried no effort level, so hints stay silent there, see [ADR 0016](../adr/0016-behaviour-preserving-wire-in.md).
-Whether interactive sessions provide it is unverified, and the keyword lists are a first guess to tune from the log.
+Interactive sessions did not provide it either in the one live check so far (Claude Code 2.1.325 on Arch, 2026-11-15): the session state file had no effort level after several events.
+So hints are expected to stay silent until the effort level is available, and the status line payload, which the state writer also records, is the next place to look.
+The keyword lists are a first guess to tune from the log.
 
 ## Editor bridge
 
