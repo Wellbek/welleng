@@ -38,6 +38,10 @@ def main(argv: list[str] | None = None) -> int:
     sa.add_argument("--description")
     sr = ss.add_parser("rm")
     sr.add_argument("name")
+    sm = ss.add_parser("migrate", help="add the Include line for config.d to ~/.ssh/config, dry run unless --yes")
+    sm.add_argument("--yes", action="store_true")
+    sm.add_argument("--undo", action="store_true", help="remove the block added by an earlier migrate")
+    sm.add_argument("--config", type=Path, default=None, help="main config file, default ~/.ssh/config")
     up2 = sub.add_parser("update", help="pull the repository, show the changes, then apply the owned config directories")
     up2.add_argument("--repo", type=Path, default=None, help="repository path, default $WELLENG_REPO or the chezmoi source")
     up2.add_argument("--yes", action="store_true", help="apply, without it nothing changes")
@@ -138,6 +142,9 @@ def main(argv: list[str] | None = None) -> int:
             if args.action == "ls":
                 main_config = Path.home() / ".ssh" / "config" if args.dir is None else None
                 print(ssh.render(ssh.list_hosts(directory, main_config)))
+            elif args.action == "migrate":
+                config = args.config or Path.home() / ".ssh" / "config"
+                print((ssh.unmigrate if args.undo else ssh.migrate)(config, args.yes))
             elif args.action == "add":
                 path = ssh.add(directory, args.name, args.hostname, args.user, args.port, args.identity, args.jump, args.description,
                                Path.home() / ".ssh" / "config" if args.dir is None else None)

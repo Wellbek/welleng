@@ -111,6 +111,53 @@ def remove(config_dir: Path, name: str) -> Path:
     return target
 
 
+INCLUDE_LINE = "Include config.d/*.conf"
+INCLUDE_RE = re.compile(r"^\s*include\s+(?:.*\s)?(?:~/\.ssh/|\.ssh/)?config\.d/\*(?:\.conf)?\s*$", re.IGNORECASE)
+
+
+def _migrated_text(text: str) -> str:
+    return f"{MARKER}\n{INCLUDE_LINE}\n\n{text}"
+
+
+def migrate(main_config: Path, apply: bool) -> str:
+    """Add `Include config.d/*.conf` at the very top of the main config, once.
+
+    The line must come first: an Include inside a Host or Match block would only apply to that
+    block. Without --yes nothing is written. The previous file is kept next to it as a backup.
+    """
+    text = main_config.read_text(encoding="utf-8") if main_config.is_file() else ""
+    if any(INCLUDE_RE.match(line) for line in text.splitlines()):
+        return "already includes config.d, nothing to do"
+    if not apply:
+        return f"would add this at the top of {main_config}:\n  {INCLUDE_LINE}\nrun again with --yes to apply, a backup is kept"
+    main_config.parent.mkdir(parents=True, exist_ok=True)
+    target = main_config.resolve()
+    if main_config.is_file():
+        backup = target.with_name(target.name + ".welleng-backup")
+        if not backup.exists():
+            backup.write_text(text, encoding="utf-8")
+            backup.chmod(0o600)
+    tmp = target.with_name(target.name + ".welleng-tmp")
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(_migrated_text(text))
+    os.replace(tmp, target)
+    return f"added the Include line to {main_config}, previous file kept as {target.name}.welleng-backup"
+
+
+def unmigrate(main_config: Path, apply: bool) -> str:
+    """Remove exactly the block that `migrate` added, and nothing else."""
+    block = f"{MARKER}\n{INCLUDE_LINE}\n\n"
+    text = main_config.read_text(encoding="utf-8") if main_config.is_file() else ""
+    if not text.startswith(block):
+        return "no welleng Include block at the top, nothing to do"
+    if not apply:
+        return "would remove the welleng Include block, run again with --yes"
+    target = main_config.resolve()
+    target.write_text(text[len(block):], encoding="utf-8")
+    return "removed the welleng Include block"
+
+
 def render(hosts: list[Host]) -> str:
     if not hosts:
         return "no hosts"
