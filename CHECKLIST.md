@@ -131,6 +131,6 @@ Anything that needs a device or an operating system that has not been reached is
 |---|---|---|---|
 | PowerShell profile and WezTerm configuration | planned | - | |
 | WSL2 guide and verification procedure | implemented, verification pending | Written, see `docs/verification/wsl2.md` | Needs a WSL2 host to verify |
-| `bootstrap/install.ps1` and the native Windows procedure | implemented, verification pending | Written, never run, see `docs/verification/windows.md` | Best effort, needs a Windows host |
+| `bootstrap/install.ps1` and the native Windows procedure | implemented, verification pending | Parses with PowerShell's own parser in a container, and in CI. Never run, see `docs/verification/windows.md` | Best effort, needs a Windows host |
 | Uninstall and rollback: `scripts/uninstall.sh` and `wire-in.sh --undo` | tested | Arch container: dry run changes nothing, `--yes` removes deployed files, keeps `secrets.env` and the user's own files, and restores the user's zshrc, tmux and ssh files byte for byte | The `uv tool` and plugin removal steps ran only as dry-run text on the real machine |
 | Troubleshooting guide | implemented | Written from the problems met while building this, `docs/troubleshooting.md` | Entries were not tried by a second person |
