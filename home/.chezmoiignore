@@ -1,4 +1,5 @@
 {{- /* Windows-only paths are not deployed elsewhere. */ -}}
 {{ if ne .chezmoi.os "windows" }}
 Documents
+.config/wezterm
 {{ end }}

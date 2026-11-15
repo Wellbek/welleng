@@ -84,6 +84,18 @@ stage_e2e() {
   fi
 }
 
+stage_powershell() {
+  if [ "$quick" -eq 1 ]; then echo "--quick given"; return 77; fi
+  # The test writes under $HOME, so it only ever runs in a container.
+  if docker info >/dev/null 2>&1; then
+    docker run --rm -e WELLENG_E2E_CONTAINER=1 -v "$root:/repo:ro" -w /repo mcr.microsoft.com/powershell:latest \
+      pwsh -NoProfile -File tests/e2e/powershell-profile.ps1
+  else
+    echo "docker is not available"
+    return 77
+  fi
+}
+
 run_stage "repository hygiene" stage_hygiene
 run_stage "secret scan of the working tree" stage_secrets
 run_stage "shell syntax and ShellCheck" stage_shell
@@ -92,6 +104,7 @@ run_stage "package map parses" stage_packages
 run_stage "Claude Code plugin validates" stage_plugin
 run_stage "Python unit tests" stage_python
 run_stage "end-to-end home test" stage_e2e
+run_stage "PowerShell profile (container)" stage_powershell
 if [ "$quick" -eq 0 ] && command -v docker >/dev/null 2>&1; then
   run_stage "wire-in end-to-end" scripts/chezmoi-container.sh tests/e2e/wire-in.sh
 fi
