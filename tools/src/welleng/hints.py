@@ -57,7 +57,7 @@ def report(directory: Path) -> str:
                 continue
     except OSError:
         pass
-    lines = [f"hints: {status}", f"recommendations logged: {len(events)}"]
+    lines = [f"hints: {status}", f"recommendations logged: {len(events)}", f"prompts that carried no effort level: {int(state.get('no_effort', 0))}"]
     for pair, n in Counter(f"{e.get('current')} -> {e.get('recommended')}" for e in events).most_common():
         lines.append(f"  {pair}: {n}")
     return "\n".join(lines)

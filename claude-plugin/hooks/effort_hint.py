@@ -58,6 +58,13 @@ def load_state(path: Path) -> dict:
         return {}
 
 
+def save_state(directory: Path, state: dict) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    tmp = directory / "hints.json.tmp"
+    tmp.write_text(json.dumps(state), encoding="utf-8")
+    tmp.replace(directory / "hints.json")
+
+
 def decide(prompt: str, current: str | None, state: dict, now: float) -> tuple[str | None, str, float]:
     """Return (level to recommend or None, estimate, confidence)."""
     est, conf = estimate(prompt)
@@ -85,13 +92,16 @@ def main() -> int:
         state = load_state(state_path)
         now = time.time()
         rec, est, conf = decide(str(event.get("prompt", "")), current, state, now)
+        if current not in LEVELS:
+            # Count prompts that arrive without an effort level, so the report shows whether hints can fire.
+            state["no_effort"] = int(state.get("no_effort", 0)) + 1
+            rec = None
         if rec is None:
+            if current not in LEVELS:
+                save_state(directory, state)
             return 0
-        directory.mkdir(parents=True, exist_ok=True)
         state["last_hint"] = now
-        tmp = state_path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(state), encoding="utf-8")
-        tmp.replace(state_path)
+        save_state(directory, state)
         with (directory / "hints.log").open("a", encoding="utf-8") as log:
             log.write(json.dumps({"t": int(now), "estimate": est, "confidence": round(conf, 2), "current": current, "recommended": rec}) + "\n")
         print(json.dumps({"systemMessage": f"hint: this looks {est}, consider /effort {rec} (now {current}). Silence with: welleng hints snooze"}))

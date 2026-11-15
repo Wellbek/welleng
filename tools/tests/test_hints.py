@@ -73,3 +73,12 @@ def test_snooze_off_on_and_report(tmp_path, monkeypatch, capsys):
     assert cli.main(["hints", "on"]) == 0
     assert hints.report(d).startswith("hints: on")
     assert cli.main(["hints", "report"]) == 0
+
+
+def test_missing_effort_is_counted_and_stays_silent(tmp_path):
+    event = {"hook_event_name": "UserPromptSubmit", "prompt": LIGHT}
+    env = {"XDG_STATE_HOME": str(tmp_path), "PATH": "/usr/bin:/bin"}
+    for _ in range(2):
+        r = subprocess.run([sys.executable, "-I", str(HOOK)], input=json.dumps(event), capture_output=True, text=True, env=env, check=False)
+        assert r.returncode == 0 and r.stdout == ""
+    assert "no effort level: 2" in hints.report(tmp_path / "welleng")
