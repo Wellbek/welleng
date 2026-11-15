@@ -1,0 +1,11 @@
+{
+  "name": "welleng-local",
+  "owner": { "name": "Well-Engineering" },
+  "plugins": [
+    {
+      "name": "welleng",
+      "source": "./claude-plugin",
+      "description": "Well-Engineering: the /harness project setup skill, a session start suggestion and effort hints"
+    }
+  ]
+}
