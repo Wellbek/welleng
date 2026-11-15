@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import agents, doctor, harness, hints, keys, repos, ssh
+from . import agents, doctor, harness, hints, keys, rc, repos, ssh
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -36,6 +36,9 @@ def main(argv: list[str] | None = None) -> int:
     sa.add_argument("--description")
     sr = ss.add_parser("rm")
     sr.add_argument("name")
+    r2 = sub.add_parser("rc", help="start Remote Control in a tmux window, or check the listening ports")
+    r2.add_argument("--name")
+    r2.add_argument("--ports", choices=["snapshot", "diff"], help="snapshot listeners before starting, diff afterwards")
     hi = sub.add_parser("hints", help="control and review effort recommendations")
     hi.add_argument("action", choices=["snooze", "off", "on", "report"])
     hi.add_argument("--hours", type=float, default=4)
@@ -78,6 +81,29 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print(agents.waiting_count(found) if args.count else agents.render(found))
         return 0
+    if args.command == "rc":
+        if args.ports:
+            directory = hints.state_dir()
+            try:
+                current = rc.listeners()
+            except RuntimeError as e:
+                print(f"rc: {e}", file=sys.stderr)
+                return 1
+            if args.ports == "snapshot":
+                rc.save_snapshot(directory, current)
+                print(f"recorded {len(current)} listening sockets")
+                return 0
+            if not rc.snapshot_path(directory).is_file():
+                print("rc: no snapshot, run `welleng rc --ports snapshot` first", file=sys.stderr)
+                return 1
+            loopback, exposed = rc.diff(directory, current)
+            for a in loopback:
+                print(f"new loopback listener: {a}")
+            for a in exposed:
+                print(f"NEW EXPOSED LISTENER: {a}")
+            print("ports check: ok" if not exposed else "ports check: FAILED, something is listening on a non-loopback address")
+            return 1 if exposed else 0
+        return rc.start(args.name)
     if args.command == "hints":
         directory = hints.state_dir()
         if args.action == "snooze":
