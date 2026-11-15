@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import doctor, harness, keys, repos
+from . import agents, doctor, harness, keys, repos
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -20,6 +20,8 @@ def main(argv: list[str] | None = None) -> int:
     k.add_argument("--tmux-conf", type=Path, default=Path.home() / ".tmux.conf")
     r = sub.add_parser("repos", help="branch and change overview of the git repositories under a root")
     r.add_argument("root", nargs="?", type=Path, default=Path.cwd())
+    a = sub.add_parser("agents", help="central view of Claude Code sessions")
+    a.add_argument("--count", action="store_true", help="print only the number of sessions waiting for you")
     h = sub.add_parser("harness", help="plan, apply and check a project's Claude Code configuration")
     hs = h.add_subparsers(dest="action", required=True)
     for action in ("plan", "apply"):
@@ -47,6 +49,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"not a directory: {args.root}", file=sys.stderr)
             return 1
         print(repos.overview(args.root.resolve()))
+        return 0
+    if args.command == "agents":
+        try:
+            found = agents.fetch()
+        except agents.AgentsError as e:
+            if args.count:
+                print("?")
+                return 0
+            print(f"agents: {e}", file=sys.stderr)
+            return 1
+        print(agents.waiting_count(found) if args.count else agents.render(found))
         return 0
     if args.command == "harness":
         return _harness(args)

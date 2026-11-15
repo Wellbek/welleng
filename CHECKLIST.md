@@ -89,9 +89,9 @@ Anything that needs a device or an operating system that has not been reached is
 | Feature | Status | Tested on | Known limitations |
 |---|---|---|---|
 | Hook and status line state writer | planned | - | |
-| `welleng agents` dashboard | planned | - | Model and usage only for sessions that ran the hooks |
-| tmux status segment | planned | - | |
-| Contract test against the installed `claude` | planned | - | |
+| `welleng agents` dashboard, base layer | tested | Arch: 8 unit tests with synthetic data, and a live run against `claude agents --json` on Claude Code 2.1.325 `[verified: Arch]` | Shows state, project, name, kind and age only. Model, effort, context and cost need the hook state writer, and there is no interactive jump or terminate yet |
+| `welleng agents --count` for a tmux status segment | tested | Arch: prints the waiting count, or `?` when `claude` fails | The tmux config does not call it yet, wiring it in changes the deployed tmux file and is still to do |
+| Contract test against the installed `claude` | tested | Arch, Claude Code 2.1.325: the real `claude agents --json` output parses and every state maps to a known value | Covers `agents --json` only, not the hook or status line payloads. Skipped automatically where `claude` is not installed, including CI |
 
 ## Phase 6 - Remote machine registry
 
