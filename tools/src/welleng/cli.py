@@ -17,6 +17,7 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     d = sub.add_parser("doctor", help="report mandatory, recommended and optional components")
     d.add_argument("--packages", type=Path, default=None, help="path to packages.toml")
+    d.add_argument("--claude", action="store_true", help="also report Claude Code plugins, versions and context cost")
     k = sub.add_parser("keys", help="searchable tmux keybinding cheatsheet")
     k.add_argument("pattern", nargs="?", help="only bindings containing this text")
     k.add_argument("--tmux-conf", type=Path, default=Path.home() / ".tmux.conf")
@@ -70,6 +71,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "doctor":
         components = doctor.load_components(args.packages or doctor.default_packages_path())
         print(doctor.render(components))
+        if args.claude:
+            print(doctor.render_plugins(doctor.load_plugins(), doctor.plugin_version_in_repo()))
         return doctor.exit_code(components)
     if args.command == "keys":
         if not args.tmux_conf.is_file():

@@ -9,12 +9,17 @@ Every command that can change something is a dry run by default or asks for `--y
 Reports components by tier: mandatory, recommended and optional.
 
 ```sh
-welleng doctor [--packages PATH]
+welleng doctor [--packages PATH] [--claude]
 ```
 
 - Each line is `ok` or `missing`, with the executable name.
 - It checks that an executable is on `PATH`, not its version.
 - Exit code 1 means a mandatory tool is missing, otherwise 0.
+- `--claude` adds the installed Claude Code plugins, from `claude plugin list --json` and `claude plugin details`.
+  Each enabled plugin shows its version and the always-on token estimate that `claude plugin details` prints.
+  That estimate also counts skills marked `disable-model-invocation`, which do not reach the model's context, so it is an upper bound.
+  An `advice` line appears when sessions load an older `welleng` plugin than the repository holds.
+  This section never changes the exit code, and it takes a few seconds per plugin.
 
 ## `welleng up`
 
