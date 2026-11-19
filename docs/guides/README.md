@@ -10,6 +10,7 @@ Anything verified only on the maintainer's Arch Linux machine is labelled as suc
 | [Command reference](commands.md) | Look up every `welleng` command and its options |
 | [Configuration](configuration.md) | Find every file the project deploys, every opt-in and every environment variable |
 | [Claude Code](claude-code.md) | Use the plugin, the `/harness` skill, the agents dashboard, effort hints and the editor bridge |
+| [Workflow](workflow.md) | Use `/welleng:mode`, its playbooks and the standalone workflow skills |
 | [Terminal, shell and editor](terminal-and-editor.md) | Learn the tmux, Neovim, git, kitty, yazi and shell setup and its keys |
 | [Remote machines and mobile](remote-and-mobile.md) | Manage SSH hosts and run Remote Control from a phone safely |
 | [Windows and WSL2](windows.md) | Use the Windows paths, which are not verified yet |
