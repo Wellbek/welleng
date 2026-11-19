@@ -36,3 +36,4 @@ Claims in these records carry one of these tags so the strength of the evidence 
 | [0017](0017-neovim-as-a-separate-app-name.md) | Neovim runs as a separate NVIM_APPNAME | Accepted |
 | [0018](0018-per-session-state-files.md) | Per-session state files written by hooks and the status line | Accepted |
 | [0019](0019-contextual-prompts-typed-through-tmux.md) | Contextual prompts are typed into the Claude pane through tmux | Accepted |
+| [0020](0020-workflow-layer-adapted-from-pstack.md) | Workflow layer adapted from pstack | Accepted |
