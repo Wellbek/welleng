@@ -92,3 +92,58 @@ def test_cli_apply_requires_yes(tmp_path, capsys):
     assert cli.main(["harness", "apply", str(spec), "--project", str(tmp_path), "--yes"]) == 0
     assert (tmp_path / "CLAUDE.md").exists()
     assert cli.main(["harness", "check", str(tmp_path)]) == 0
+
+
+def test_plugin_intent_merges_into_existing_settings(tmp_path):
+    local = tmp_path / ".claude" / "settings.local.json"
+    local.parent.mkdir()
+    local.write_text(json.dumps({"enabledPlugins": {"other@market": True}, "model": "opus"}))
+    spec = {"intents": [{"kind": "plugin", "id": "welleng@welleng-local", "shared": False}]}
+    harness.apply(harness.plan(spec, tmp_path))
+    data = json.loads(local.read_text())
+    assert data["enabledPlugins"] == {"other@market": True, "welleng@welleng-local": True}
+    assert data["model"] == "opus"
+    assert not (tmp_path / ".claude" / "settings.json").exists()
+    assert harness.plan(spec, tmp_path) == []
+
+
+def test_shared_plugin_brings_its_marketplace(tmp_path):
+    market = {"name": "welleng-local", "source": {"source": "github", "repo": "owner/welleng"}}
+    spec = {"intents": [{"kind": "plugin", "id": "welleng@welleng-local", "shared": True, "marketplace": market}]}
+    harness.apply(harness.plan(spec, tmp_path))
+    data = json.loads((tmp_path / ".claude" / "settings.json").read_text())
+    assert data["enabledPlugins"] == {"welleng@welleng-local": True}
+    assert data["extraKnownMarketplaces"] == {"welleng-local": {"source": market["source"]}}
+
+
+@pytest.mark.parametrize(
+    "intent, message",
+    [
+        ({"id": "no-marketplace"}, "name@marketplace"),
+        ({"id": "a@b", "shared": True}, "needs its marketplace"),
+        ({"id": "a@b", "marketplace": {"name": "b", "source": {"source": "github", "repo": "o/r"}}}, "only written for a shared"),
+        ({"id": "a@b", "shared": True, "marketplace": {"name": "c", "source": {"source": "github", "repo": "o/r"}}}, "must match"),
+        ({"id": "a@b", "shared": True, "marketplace": {"name": "b", "source": {"source": "directory", "path": "/x"}}}, "cannot be shared"),
+        ({"id": "a@b", "shared": True, "marketplace": {"name": "b", "source": {"source": "github"}}}, "with its location"),
+    ],
+)
+def test_invalid_plugin_intents_are_refused(tmp_path, intent, message):
+    with pytest.raises(harness.SpecError, match=message):
+        harness.plan({"intents": [{"kind": "plugin", **intent}]}, tmp_path)
+
+
+def test_notes_suggest_a_verification_skill_and_flag_unenforced_rules(tmp_path):
+    assert any("verify-setup" in n for n in harness.notes(tmp_path))
+    skill = tmp_path / ".claude" / "skills" / "verify-app" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text("---\nname: verify-app\n---\n")
+    table = "| Rule | Enforced by |\n|---|---|\n| No em dash | `scripts/check-hygiene.sh` |\n| Reproduce first | Nothing, judgment call |\n"
+    harness.apply(harness.plan({"intents": [{"kind": "claude_md", "name": "rules", "text": table}]}, tmp_path))
+    assert harness.notes(tmp_path) == ["CLAUDE.md: rule has no enforcer, consider /welleng:correct: Reproduce first"]
+    assert harness.check(tmp_path) == []
+
+
+def test_cli_check_prints_notes_without_failing(tmp_path, capsys):
+    assert cli.main(["harness", "check", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert "note: no verification skill" in out and "harness check: ok" in out

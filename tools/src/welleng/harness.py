@@ -14,8 +14,16 @@ Spec format:
       {"kind": "ask", "rules": ["Bash(git push:*)"]},
       {"kind": "hook", "event": "PostToolUse", "matcher": "Edit|Write", "command": "ruff format ."},
       {"kind": "mcp", "name": "db", "config": {"command": "...", "env": {"URL": "${DB_URL}"}}},
-      {"kind": "local_setting", "key": "model", "value": "sonnet"}
+      {"kind": "local_setting", "key": "model", "value": "sonnet"},
+      {"kind": "plugin", "id": "welleng@welleng-local", "shared": false},
+      {"kind": "plugin", "id": "welleng@welleng-local", "shared": true,
+       "marketplace": {"name": "welleng-local", "source": {"source": "github", "repo": "OWNER/REPO"}}}
     ]}
+
+A `plugin` intent enables a plugin for the project.
+With `shared` false it goes into the personal `.claude/settings.local.json`.
+With `shared` true it goes into `.claude/settings.json` for every collaborator, together with the marketplace
+they need to install it from, because a local marketplace path means nothing on their machine.
 """
 
 from __future__ import annotations
@@ -35,6 +43,8 @@ SECRET_RE = re.compile(
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----)"
 )
 ENV_REF_RE = re.compile(r"^\$\{[A-Z_][A-Z0-9_]*\}$")
+PLUGIN_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*@[a-z0-9][a-z0-9-]*$")
+MARKETPLACE_SOURCES = {"github": "repo", "git": "url", "url": "url", "directory": "path"}
 HOOK_EVENTS = {"PreToolUse", "PostToolUse", "Stop", "SessionStart", "UserPromptSubmit", "SubagentStop"}
 
 
@@ -125,8 +135,32 @@ def validate(spec: dict) -> None:
         elif kind == "local_setting":
             if not intent.get("key"):
                 raise SpecError("local_setting needs a key")
+        elif kind == "plugin":
+            _validate_plugin(intent)
         else:
             raise SpecError(f"unknown intent kind: {kind}")
+
+
+def _validate_plugin(intent: dict) -> None:
+    if not PLUGIN_ID_RE.match(intent.get("id", "")):
+        raise SpecError("plugin id must look like name@marketplace")
+    if not isinstance(intent.get("shared", False), bool):
+        raise SpecError("plugin shared must be true or false")
+    market = intent.get("marketplace")
+    if market is None:
+        if intent.get("shared"):
+            raise SpecError("a shared plugin needs its marketplace, so collaborators can install it")
+        return
+    if not intent.get("shared"):
+        raise SpecError("a marketplace is only written for a shared plugin")
+    if market.get("name") != intent["id"].split("@", 1)[1]:
+        raise SpecError("the marketplace name must match the part of the plugin id after @")
+    source = market.get("source", {})
+    field = MARKETPLACE_SOURCES.get(source.get("source"))
+    if field is None or not str(source.get(field, "")).strip():
+        raise SpecError(f"marketplace source must be one of {sorted(MARKETPLACE_SOURCES)} with its location")
+    if source["source"] == "directory":
+        raise SpecError("a directory marketplace only exists on one machine, it cannot be shared")
 
 
 def plan(spec: dict, root: Path) -> list[Change]:
@@ -188,6 +222,14 @@ def plan(spec: dict, root: Path) -> list[Change]:
             data = json.loads(get(local) or "{}") if local in current else _load_json(local)
             data[intent["key"]] = intent["value"]
             put(local, _dump(data))
+        elif kind == "plugin":
+            target = settings if intent.get("shared") else local
+            data = json.loads(get(target) or "{}") if target in current else _load_json(target)
+            data.setdefault("enabledPlugins", {})[intent["id"]] = True
+            if intent.get("marketplace"):
+                market = intent["marketplace"]
+                data.setdefault("extraKnownMarketplaces", {})[market["name"]] = {"source": market["source"]}
+            put(target, _dump(data))
 
     return [Change(p, originals[p], c) for p, c in current.items() if originals[p] != c]
 
@@ -237,6 +279,34 @@ def check(root: Path) -> list[str]:
             if sorted(begins) != sorted(ends):
                 problems.append(f"{rel}: managed block markers do not pair up")
     return problems
+
+
+def notes(root: Path) -> list[str]:
+    """Advice for the project's agent setup. Unlike `check`, a note is never a failure."""
+    found: list[str] = []
+    skills = root / ".claude" / "skills"
+    if not any(skills.glob("verify-*/SKILL.md")):
+        found.append("no verification skill under .claude/skills/verify-*/, run /welleng:verify-setup to create one")
+    claude_md = root / "CLAUDE.md"
+    if claude_md.exists():
+        text = claude_md.read_text(encoding="utf-8")
+        m = re.search(r"<!-- welleng:begin rules -->(.*?)<!-- welleng:end rules -->", text, re.S)
+        if m:
+            for rule, enforcer in _rule_rows(m.group(1)):
+                if not enforcer or enforcer.lower().startswith(("nothing", "none", "-")):
+                    found.append(f"CLAUDE.md: rule has no enforcer, consider /welleng:correct: {rule}")
+    return found
+
+
+def _rule_rows(block: str) -> list[tuple[str, str]]:
+    """The (rule, enforced by) pairs of the Markdown table in the `rules` block, header and divider excluded."""
+    rows = []
+    for line in block.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if not line.strip().startswith("|") or len(cells) < 2 or set(cells[0]) <= set("-: "):
+            continue
+        rows.append((cells[0], cells[1]))
+    return rows[1:] if rows and rows[0][0].lower() == "rule" else rows
 
 
 def _check_hook(root: Path, rel: Path, event: str, hook: dict) -> list[str]:

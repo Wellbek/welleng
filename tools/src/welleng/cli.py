@@ -177,6 +177,8 @@ def _harness(args) -> int:
         problems = harness.check(args.project.resolve())
         for p in problems:
             print(p)
+        for note in harness.notes(args.project.resolve()):
+            print(f"note: {note}")
         print("harness check: ok" if not problems else f"harness check: {len(problems)} problem(s)")
         return 1 if problems else 0
     root = args.project.resolve()
