@@ -37,3 +37,4 @@ Claims in these records carry one of these tags so the strength of the evidence 
 | [0018](0018-per-session-state-files.md) | Per-session state files written by hooks and the status line | Accepted |
 | [0019](0019-contextual-prompts-typed-through-tmux.md) | Contextual prompts are typed into the Claude pane through tmux | Accepted |
 | [0020](0020-workflow-layer-adapted-from-pstack.md) | Workflow layer adapted from pstack | Accepted |
+| [0021](0021-effort-level-from-the-status-line-state.md) | The effort level for hints comes from the status line state | Accepted |
