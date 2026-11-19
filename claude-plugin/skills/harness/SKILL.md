@@ -30,6 +30,11 @@ Ask only the ones that apply, in this order:
 5. Actions that need confirmation first, such as pushing or deleting (`ask` rules, for example `Bash(git push:*)`).
 6. A database or service the agent should query (an `mcp` intent with credentials as `${VAR}` references).
 7. Rules that only apply to some paths (a `rule_file` intent with `paths`).
+8. Rules agents keep breaking, and what enforces each one (a `claude_md` block named `rules` holding a two-column table, `Rule` and `Enforced by`, where a judgment call says `Nothing`).
+9. Whether to use the `/welleng:mode` workflow in this project (a line in the `conventions` block, such as "Use /welleng:mode for non-trivial work").
+   If collaborators should get the plugin too, ask whether to share it.
+   By default enable it only for the user, with a `plugin` intent and `shared` false.
+   Share it only after warning that every collaborator then installs it, and ask for the GitHub repository that hosts the marketplace for the `marketplace` field.
 
 ## Flow
 
@@ -41,6 +46,7 @@ Ask only the ones that apply, in this order:
 4. Run `welleng harness plan SPEC.json` and show the user the output.
 5. Ask whether to apply it.
    Only after a clear yes, run `welleng harness apply SPEC.json --yes`.
-6. Run `welleng harness check` and report the result.
+6. Run `welleng harness check` and report the result, including its notes.
+7. If the notes say the project has no verification skill and it has a user-facing surface, suggest `/welleng:verify-setup`.
 
 If the `welleng` command is not found, tell the user to install it with `uv tool install` from the `tools/` directory of the Well-Engineering repository, and stop.
