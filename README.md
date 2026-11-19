@@ -7,8 +7,9 @@ It installs from a single Git repository, keeps the editor, multiplexer, Git too
 ## Status
 
 **Early implementation, Linux first.**
-Working today, tested on Arch Linux and in Ubuntu, Fedora and Arch containers: the installer and its pinned releases, the chezmoi source state, an opt-in shell integration, the `welleng` commands listed below, the Claude Code plugin with the `/harness` skill and effort hints, a Neovim configuration, a reversible wire-in and uninstall, and a regression harness with security checks.
-Not yet verified: native Windows, WSL2, macOS, a phone connected through Remote Control, and interactive use of the hints and the `/harness` skill.
+Working today, tested on Arch Linux and in Ubuntu, Fedora and Arch containers: the installer and its pinned releases, the chezmoi source state, an opt-in shell integration, the `welleng` commands listed below, the Claude Code plugin with the `/harness` skill, effort hints and the `/welleng:mode` workflow layer, a Neovim configuration, a reversible wire-in and uninstall, and a regression harness with security checks.
+Effort hints were verified in a live interactive session on Arch.
+Not yet verified: native Windows, WSL2, macOS, a phone connected through Remote Control, the `/harness` questionnaire in a live session, and most workflow skills on real tasks.
 `docs/verification/` holds the manual procedure for each of those.
 
 [CHECKLIST.md](CHECKLIST.md) is the single source of truth for what exists and what has been verified, per platform.
@@ -163,6 +164,15 @@ A Claude Code plugin ships a `/harness` skill that sets up a project's agent con
 - Free-form answers are rewritten into concise, imperative instructions using a rubric.
 - Before writing anything it shows a plan of changes with the exact files and a diff for each modification, and nothing is written until you approve.
 - Generated text lives in delimited blocks, so updates replace only managed blocks and never touch the rest of a file.
+
+### Workflow layer
+
+The plugin also ships `/welleng:mode`, a workflow layer adapted from pstack, see [ADR 0020](docs/adr/0020-workflow-layer-adapted-from-pstack.md) and the [workflow guide](docs/guides/workflow.md).
+
+- One entry skill picks a playbook, such as bug fix, feature or refactoring, and follows its steps.
+- 24 principles and a role table give each subagent an explicit model and effort level.
+- 22 standalone skills, such as `/welleng:interrogate` and `/welleng:verify-setup`, are typed by the user, so they cost no context until used.
+- `scripts/check-skills.py` keeps every skill, playbook and principle consistent.
 - Each answer goes to the most deterministic mechanism that fits:
 
 | Intent | Mechanism |
@@ -266,6 +276,7 @@ Existing today:
 
 ```
 .githooks/pre-commit          secret scan and hygiene gate
+.githooks/commit-msg          commit message gate
 .github/workflows/ci.yml      CI
 .claude/settings.json         project permission baseline
 scripts/check-hygiene.sh      hygiene checks shared by the hook and CI
@@ -277,10 +288,14 @@ scripts/regression.sh         full regression run, see below
 scripts/chezmoi-container.sh  run a command in a clean Arch container
 tests/                        security policy checks and the end-to-end home test
 scripts/apply-ecc-overrides.py  merge the ecc override list into Claude Code settings
+scripts/check-skills.py       lint for skills, agents, playbooks and one sentence per line
+scripts/check-commit-msg.sh   commit subject and attribution check, used by .githooks/commit-msg
+scripts/pstack-upstream-diff.py  list upstream pstack changes since the adapted commit
 packages/packages.toml        logical package name to package id per platform
 packages/releases.toml        pinned release archives with SHA-256 for tools without a package
 bootstrap/                    install.sh, install.ps1 (not yet run), plan.py and install_release.py
-claude-plugin/                the welleng Claude Code plugin: /harness skill, hooks (suggestion, effort hints, state writer) and an opt-in status line script
+claude-plugin/                the welleng Claude Code plugin: /harness, /welleng:mode and the workflow skills, two subagents, hooks (suggestion, effort hints, state writer) and an opt-in status line script
+.claude/skills/verify-welleng/ project skill that drives a live Claude Code session to verify this repository
 scripts/distro-container.sh   run a command in a clean Ubuntu, Fedora or Arch container
 scripts/nvim-container.sh     test the Neovim configuration in a container
 scripts/wire-in.sh            reversible connection to an existing zsh, tmux and ssh setup
@@ -294,7 +309,7 @@ home/                         chezmoi source state: tmux and git config, tpm, we
 CLAUDE.md                     agent instructions for this repository
 CHECKLIST.md                  verification status per feature and platform
 docs/adr/                     architecture decision records
-docs/guides/                  user guides: install, commands, configuration, Claude Code, terminal and editor, remote, Windows
+docs/guides/                  user guides: install, commands, configuration, Claude Code, workflow, terminal and editor, remote, Windows
 docs/security.md              secrets and remote access model
 docs/platforms.md             platform tiers and verification policy
 ```
@@ -367,6 +382,7 @@ To contribute, enable the hooks once per clone with `git config core.hooksPath .
 | 7 | Mobile access |
 | 8 | Effort recommendations |
 | 9 | Windows and WSL2 hardening, uninstall, troubleshooting, final documentation |
+| 10 | Workflow layer adapted from pstack |
 
 Each phase ends with tests on the stated platforms, updated documentation and an updated [CHECKLIST.md](CHECKLIST.md).
 
@@ -374,7 +390,7 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 
 | Document | Contents |
 |---|---|
-| [docs/guides/](docs/guides/README.md) | User guides: installation, command reference, configuration, Claude Code, terminal and editor, remote and mobile, Windows |
+| [docs/guides/](docs/guides/README.md) | User guides: installation, command reference, configuration, Claude Code, workflow, terminal and editor, remote and mobile, Windows |
 | [CHECKLIST.md](CHECKLIST.md) | Feature status and the platform each was tested on |
 | [docs/adr/](docs/adr/README.md) | Architecture decision records and the evidence tags |
 | [docs/security.md](docs/security.md) | Credentials, scanning and remote access |
@@ -388,7 +404,7 @@ Each phase ends with tests on the stated platforms, updated documentation and an
 - Commits are small, one concern each, with Conventional Commits subjects such as `feat:`, `fix:`, `docs:`, `chore:` and `ci:`.
 - Significant decisions get a numbered record in `docs/adr/`, and a changed decision gets a new record that supersedes the old one.
 - Markdown is written with one full sentence per line.
-- The em dash character is not used, and `scripts/check-hygiene.sh` enforces it.
+- The em dash character is not used, and `scripts/check-hygiene.sh` enforces it together with one sentence per line.
 - Shell scripts use `bash` with `set -euo pipefail`, are ShellCheck-clean and are idempotent.
 - Custom tooling is Python 3.11 or newer, run through `uv`.
 
