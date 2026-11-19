@@ -5,6 +5,8 @@ Local and free: a small keyword and length scorer, no model call, no network.
 It never switches anything. It prints one `systemMessage` JSON object, shown to the user only,
 or nothing. It prefers silence: a hint needs a gap of two levels or more and clear confidence.
 State lives in $XDG_STATE_HOME/welleng (default ~/.local/state/welleng), never in ~/.claude.
+The effort level comes from the prompt event when it carries one. Claude Code 2.1.328 sends interactive prompt
+events without it, so the hook then reads the level the status line recorded for the session (ADR 0021).
 The log records the estimate and the levels only, never prompt text.
 Standard library only, and it never raises.
 """
@@ -17,6 +19,11 @@ import re
 import sys
 import time
 from pathlib import Path
+
+# `python3 -I` leaves the script directory off sys.path, so add it for the sibling module.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from state_writer import SESSION_ID_RE  # noqa: E402
 
 LEVELS = ["low", "medium", "high", "xhigh", "max"]
 RECOMMEND = {"light": "low", "standard": "medium", "heavy": "high"}
@@ -80,6 +87,14 @@ def decide(prompt: str, current: str | None, state: dict, now: float) -> tuple[s
     return rec, est, conf
 
 
+def session_effort(directory: Path, session_id: object) -> str | None:
+    """The effort level the status line recorded for this session, or None."""
+    if not isinstance(session_id, str) or not SESSION_ID_RE.match(session_id):
+        return None
+    level = load_state(directory / "sessions" / f"{session_id}.json").get("effort")
+    return level if level in LEVELS else None
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -88,6 +103,8 @@ def main() -> int:
         effort = event.get("effort")
         current = effort.get("level") if isinstance(effort, dict) else None
         directory = state_dir()
+        if current not in LEVELS:
+            current = session_effort(directory, event.get("session_id"))
         state_path = directory / "hints.json"
         state = load_state(state_path)
         now = time.time()
