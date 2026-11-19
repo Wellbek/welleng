@@ -51,7 +51,7 @@ def run(repo: Path, home: Path, yes: bool) -> int:
     have_chezmoi = shutil.which("chezmoi") is not None
     base = ["chezmoi", "--source", str(repo), "--destination", str(home)]
     if have_chezmoi:
-        drift = subprocess.run([*base, "diff", "--exclude=externals", *chezmoi_args(repo, home)], capture_output=True, text=True, check=False)
+        drift = subprocess.run([*base, "diff", "--recursive", "--exclude=externals", *chezmoi_args(repo, home)], capture_output=True, text=True, check=False)
         print("deployed files differ from the repository:" if drift.stdout.strip() else "deployed files match the repository")
         if drift.stdout.strip():
             print(drift.stdout)
