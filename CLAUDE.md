@@ -59,4 +59,4 @@ Existing today:
 
 Planned, not created yet:
 
-- everything in `docs/verification/` that needs a device, and live checks of the `/harness` questionnaire and the editor bridge
+- everything in `docs/verification/` that needs a device, and a live check of the editor bridge

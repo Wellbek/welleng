@@ -8,8 +8,8 @@ It installs from a single Git repository, keeps the editor, multiplexer, Git too
 
 **Early implementation, Linux first.**
 Working today, tested on Arch Linux and in Ubuntu, Fedora and Arch containers: the installer and its pinned releases, the chezmoi source state, an opt-in shell integration, the `welleng` commands listed below, the Claude Code plugin with the `/harness` skill, effort hints and the `/welleng:mode` workflow layer, a Neovim configuration, a reversible wire-in and uninstall, and a regression harness with security checks.
-Effort hints were verified in a live interactive session on Arch.
-Not yet verified: native Windows, WSL2, macOS, a phone connected through Remote Control, the `/harness` questionnaire in a live session, and most workflow skills on real tasks.
+Effort hints and the `/harness` questionnaire were verified in a live interactive session on Arch.
+Not yet verified: native Windows, WSL2, macOS, a phone connected through Remote Control, the editor bridge in a live session, and most workflow skills on real tasks.
 `docs/verification/` holds the manual procedure for each of those.
 
 [CHECKLIST.md](CHECKLIST.md) is the single source of truth for what exists and what has been verified, per platform.

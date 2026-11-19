@@ -5,7 +5,8 @@ It never parses files under `~/.claude/`, see [ADR 0005](../adr/0005-official-cl
 
 Verification status: the plugin validates, its hooks ran headless on Claude Code 2.1.325, and effort hints, the status line and the state writer ran in a live interactive session on Claude Code 2.1.328, all on Arch.
 The `/welleng:mode` skill and the `welleng:worker` subagent ran headless on 2.1.328 on Arch.
-The `/harness` questionnaire and the editor bridge have not been verified interactively, see [docs/verification/interactive.md](../verification/interactive.md).
+The `/harness` questionnaire ran in a live interactive session on 2.1.328 on Arch.
+The editor bridge has not been verified interactively, see [docs/verification/interactive.md](../verification/interactive.md).
 
 ## Install the plugin
 
