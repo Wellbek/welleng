@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Commit message gate: Conventional Commits subject, no AI attribution.
+# Enable once per clone with: git config core.hooksPath .githooks
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel)"
+"$root/scripts/check-commit-msg.sh" "$1"
