@@ -82,3 +82,25 @@ def test_missing_effort_is_counted_and_stays_silent(tmp_path):
         r = subprocess.run([sys.executable, "-I", str(HOOK)], input=json.dumps(event), capture_output=True, text=True, env=env, check=False)
         assert r.returncode == 0 and r.stdout == ""
     assert "no effort level: 2" in hints.report(tmp_path / "welleng")
+
+
+def test_effort_comes_from_the_status_line_state_when_the_prompt_event_has_none(tmp_path):
+    # Claude Code 2.1.328 sends UserPromptSubmit without an effort field in interactive sessions,
+    # while the status line payload carries it and the status line script records it per session.
+    sessions = tmp_path / "welleng" / "sessions"
+    sessions.mkdir(parents=True)
+    (sessions / "abc-123.json").write_text(json.dumps({"session_id": "abc-123", "effort": "high"}))
+    event = {"hook_event_name": "UserPromptSubmit", "prompt": LIGHT, "session_id": "abc-123"}
+    env = {"XDG_STATE_HOME": str(tmp_path), "PATH": "/usr/bin:/bin"}
+    r = subprocess.run([sys.executable, "-I", str(HOOK)], input=json.dumps(event), capture_output=True, text=True, env=env, check=False)
+    assert r.returncode == 0
+    assert "/effort low (now high)" in r.stdout
+
+
+def test_an_unsafe_session_id_is_never_used_as_a_path(tmp_path):
+    (tmp_path / "welleng").mkdir()
+    (tmp_path / "evil.json").write_text(json.dumps({"effort": "high"}))
+    event = {"hook_event_name": "UserPromptSubmit", "prompt": LIGHT, "session_id": "../../evil"}
+    env = {"XDG_STATE_HOME": str(tmp_path), "PATH": "/usr/bin:/bin"}
+    r = subprocess.run([sys.executable, "-I", str(HOOK)], input=json.dumps(event), capture_output=True, text=True, env=env, check=False)
+    assert r.returncode == 0 and r.stdout == ""
