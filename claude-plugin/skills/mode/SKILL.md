@@ -23,8 +23,11 @@ If a summary says that mode was active, read this file again.
 
 ## Non-negotiables
 
-- In your first reply, restate the goal and the smallest change that meets it, then proceed.
-  Open every subagent brief, every pull request's `Why` section and your final report with the goal.
+- Before any other tool call, match the task to a playbook and read its file, even for a small question.
+- Open your first reply with two lines, then proceed:
+  `Goal:` the user's goal and the smallest change that meets it.
+  `Playbook:` the playbook you picked, or `figure-it-out`.
+- Open every subagent brief, every pull request's `Why` section and your final report with the goal.
 - Name each principle that shaped a decision and the choice it changed.
   Cite only principles whose file you read in this session.
 - A fork you could settle by running something gets a prototype, per `playbooks/prototype.md`, instead of a question.
