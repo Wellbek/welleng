@@ -12,7 +12,7 @@ Checked files: every Markdown file under claude-plugin/skills/, claude-plugin/ag
 - An agent has frontmatter whose `name` matches its file name, and a `description`.
 - No Cursor-only names survive the port, and nothing points at Claude Code transcripts (ADR 0005).
 - Every reference resolves: `playbooks/<x>.md`, `principles/<x>.md`, `/welleng:<skill>`, `welleng:<agent>`,
-  `../<skill>/SKILL.md` and relative Markdown links.
+  `../<skill>/SKILL.md`, any other backticked `../` path, which is relative to the skill folder, and relative Markdown links.
 - Prose keeps one sentence per line.
 
 Standard library only. Exit code 0 when clean, 1 with one `path:line: problem` line per finding.
@@ -38,6 +38,7 @@ PLAYBOOK_REF = re.compile(r"\b(playbooks|principles)/([a-z0-9-]+)\.md")
 SKILL_REF = re.compile(r"/welleng:([a-z0-9-]+)")
 AGENT_REF = re.compile(r"(?<![/\w])welleng:([a-z0-9-]+)")
 SIBLING_REF = re.compile(r"\.\./([a-z0-9-]+)/SKILL\.md")
+RELATIVE_REF = re.compile(r"`(\.\./[A-Za-z0-9_./-]+\.[a-z]+)`")
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)\)")
 INLINE_CODE = re.compile(r"`[^`]*`")
 LIST_MARKER = re.compile(r"^(\d+\.|[-*+])\s+")
@@ -96,6 +97,13 @@ class Checker:
     def agent_exists(self, name: str) -> bool:
         return (self.plugin / "agents" / f"{name}.md").is_file()
 
+    def skill_root(self, path: Path) -> Path | None:
+        """The folder of the skill that owns `path`, which `../` references are relative to."""
+        for base in (self.plugin / "skills", self.root / ".claude" / "skills"):
+            if base in path.parents:
+                return base / path.relative_to(base).parts[0]
+        return None
+
     def check_frontmatter(self, path: Path, text: str) -> int:
         """Validate frontmatter where it is required and return the number of lines it takes."""
         parsed = frontmatter(text)
@@ -137,6 +145,10 @@ class Checker:
         for name in SIBLING_REF.findall(line):
             if not self.skill_exists(name):
                 self.report(path, number, f"../{name}/SKILL.md does not exist")
+        root = self.skill_root(path)
+        for target in RELATIVE_REF.findall(line):
+            if root and not (root / target).exists():
+                self.report(path, number, f"{target} does not exist relative to the skill folder")
         for target in LINK.findall(line):
             if re.match(r"[a-z]+:", target) or target.startswith("#"):
                 continue

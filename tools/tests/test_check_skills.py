@@ -15,7 +15,7 @@ disable-model-invocation: true
 
 # {name}
 
-Read `playbooks/bug-fix.md` and `principles/prove-it-works.md` first.
+Read `playbooks/bug-fix.md`, `principles/prove-it-works.md` and `../mode/SKILL.md` first.
 Then spawn `welleng:worker`.
 """
 
@@ -70,11 +70,11 @@ def test_plugin_skills_must_be_user_invoked(tmp_path):
 
 def test_missing_references_are_reported(tmp_path):
     root = tree(tmp_path)
-    body = GOOD_SKILL.format(name="why") + "\nSee `playbooks/nope.md`, /welleng:ghost, `welleng:phantom` and `../gone/SKILL.md`.\n"
+    body = GOOD_SKILL.format(name="why") + "\nSee `playbooks/nope.md`, /welleng:ghost, `welleng:phantom`, `../gone/SKILL.md` and `../mode/nope.md`.\n"
     write_skill(root, "why", body)
     code, err = check(root)
     assert code == 1
-    for needle in ("playbooks/nope.md", "/welleng:ghost", "welleng:phantom", "../gone/SKILL.md"):
+    for needle in ("playbooks/nope.md", "/welleng:ghost", "welleng:phantom", "../gone/SKILL.md", "../mode/nope.md"):
         assert needle in err, needle
 
 
