@@ -1,6 +1,7 @@
 {
   "name": "welleng-local",
   "owner": { "name": "Well-Engineering" },
+  "description": "Local marketplace for the Well-Engineering Claude Code plugin",
   "plugins": [
     {
       "name": "welleng",
