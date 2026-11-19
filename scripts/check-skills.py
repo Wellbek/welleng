@@ -148,6 +148,8 @@ class Checker:
                 self.report(path, number, f"../{name}/SKILL.md does not exist")
         root = self.skill_root(path)
         for target in RELATIVE_REF.findall(line):
+            if SIBLING_REF.fullmatch(target):
+                continue
             if root and not (root / target).exists():
                 self.report(path, number, f"{target} does not exist relative to the skill folder")
         for target in [] if in_code else LINK.findall(line):
