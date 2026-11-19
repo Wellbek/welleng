@@ -87,7 +87,7 @@ def test_cursor_names_and_transcript_paths_are_rejected(tmp_path):
 
 def test_two_sentences_on_one_line_are_rejected_but_lists_and_code_are_not(tmp_path):
     root = tree(tmp_path)
-    fine = GOOD_SKILL.format(name="why") + "\n1. Do this.\n- Use `a. B` and e.g. Foo.\n\n```\nOne. Two.\n```\n| A. B | C |\n"
+    fine = GOOD_SKILL.format(name="why") + "\n1. Do this.\n- Use `a. B` and e.g. Foo.\n\n```\nOne. Two. [example](missing.md)\n```\n| A. B | C |\n"
     write_skill(root, "why", fine)
     assert check(root)[0] == 0
     write_skill(root, "why", fine + "\nFirst sentence. Second sentence.\n")

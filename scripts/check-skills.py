@@ -12,7 +12,8 @@ Checked files: every Markdown file under claude-plugin/skills/, claude-plugin/ag
 - An agent has frontmatter whose `name` matches its file name, and a `description`.
 - No Cursor-only names survive the port, and nothing points at Claude Code transcripts (ADR 0005).
 - Every reference resolves: `playbooks/<x>.md`, `principles/<x>.md`, `/welleng:<skill>`, `welleng:<agent>`,
-  `../<skill>/SKILL.md`, any other backticked `../` path, which is relative to the skill folder, and relative Markdown links.
+  `../<skill>/SKILL.md`, any other backticked `../` path, which is relative to the skill folder, and relative Markdown
+  links outside code blocks.
 - Prose keeps one sentence per line.
 
 Standard library only. Exit code 0 when clean, 1 with one `path:line: problem` line per finding.
@@ -132,7 +133,7 @@ class Checker:
                 self.report(path, 2, "plugin skills are user-invoked: set disable-model-invocation: true")
         return size
 
-    def check_references(self, path: Path, number: int, line: str) -> None:
+    def check_references(self, path: Path, number: int, line: str, in_code: bool) -> None:
         for kind, slug in PLAYBOOK_REF.findall(line):
             if not (self.mode / kind / f"{slug}.md").is_file():
                 self.report(path, number, f"{kind}/{slug}.md does not exist under skills/mode/")
@@ -149,7 +150,7 @@ class Checker:
         for target in RELATIVE_REF.findall(line):
             if root and not (root / target).exists():
                 self.report(path, number, f"{target} does not exist relative to the skill folder")
-        for target in LINK.findall(line):
+        for target in [] if in_code else LINK.findall(line):
             if re.match(r"[a-z]+:", target) or target.startswith("#"):
                 continue
             if not (path.parent / target.partition("#")[0]).exists():
@@ -177,7 +178,7 @@ class Checker:
             if line.lstrip().startswith("```"):
                 in_code = not in_code
                 continue
-            self.check_references(path, number, line)
+            self.check_references(path, number, line, in_code)
             if not in_code:
                 self.check_sentences(path, number, line)
 
