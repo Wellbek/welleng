@@ -3,8 +3,9 @@
 Well-Engineering works with Claude Code only through its official interfaces: the CLI JSON output, hooks, the status line, settings and plugins.
 It never parses files under `~/.claude/`, see [ADR 0005](../adr/0005-official-claude-code-interfaces-only.md).
 
-Verification status: the plugin validates and its hooks ran in a headless session on Claude Code 2.1.325 on Arch.
-Interactive use of the hints, the `/harness` questionnaire, the state writer and the editor bridge has not been verified, see [docs/verification/interactive.md](../verification/interactive.md).
+Verification status: the plugin validates, its hooks ran headless on Claude Code 2.1.325, and effort hints, the status line and the state writer ran in a live interactive session on Claude Code 2.1.328, all on Arch.
+The `/welleng:mode` skill and the `welleng:worker` subagent ran headless on 2.1.328 on Arch.
+The `/harness` questionnaire and the editor bridge have not been verified interactively, see [docs/verification/interactive.md](../verification/interactive.md).
 
 ## Install the plugin
 
@@ -24,6 +25,8 @@ The plugin contains:
 | Part | What it does |
 |---|---|
 | `/harness` skill | Questionnaire that sets up a project's Claude Code configuration |
+| `/welleng:mode` and the workflow skills | Playbooks, principles and subagent roles for rigorous engineering work, see [the workflow guide](workflow.md) |
+| `welleng:worker` and `welleng:comment-reviewer` subagents | Delegates that carry the Well-Engineering rules, used by the workflow skills |
 | `SessionStart` hook | Suggests `/harness` once in a git repository that has no `CLAUDE.md` and no `.claude/settings.json` |
 | `UserPromptSubmit` hook | Effort hints |
 | State writer hooks | Record per-session model, effort and subagents for the dashboard |
@@ -138,9 +141,9 @@ welleng hints report
 
 The log in `~/.local/state/welleng/hints.log` holds the estimate and the levels only, never the prompt text.
 `welleng hints report` also counts prompts that arrived without an effort level.
-In headless mode the hook input carried no effort level, so hints stay silent there, see [ADR 0016](../adr/0016-behaviour-preserving-wire-in.md).
-Interactive sessions did not provide it either in the one live check so far (Claude Code 2.1.325 on Arch, 2026-11-15): the session state file had no effort level after several events.
-So hints are expected to stay silent until the effort level is available, and the status line payload, which the state writer also records, is the next place to look.
+Claude Code 2.1.328 sends the prompt event without an effort level, so the hook reads the level that the status line script recorded for the session, see [ADR 0021](../adr/0021-effort-level-from-the-status-line-state.md).
+Hints therefore need the opt-in status line from the section above, and without it they stay silent.
+In a live interactive session on Arch, a light prompt at `high` effort showed `hint: this looks light, consider /effort low (now high)` under the prompt, and a second light prompt within 30 minutes stayed silent `[verified: Arch]`.
 The keyword lists are a first guess to tune from the log.
 
 ## Editor bridge
@@ -178,7 +181,7 @@ Remote Control does not work in `glm` sessions.
 
 ## Global instructions
 
-`~/.config/welleng/claude/CLAUDE.md` holds general agent rules: safety, working style and writing conventions.
+`~/.config/welleng/claude/CLAUDE.md` holds general agent rules: safety, an autonomy policy, working style, writing conventions and a pointer to `/welleng:mode`.
 To use it, add this line to your own `~/.claude/CLAUDE.md`:
 
 ```
@@ -186,7 +189,7 @@ To use it, add this line to your own `~/.claude/CLAUDE.md`:
 ```
 
 Nothing replaces your file.
-A live session has not loaded it yet.
+A live session on Claude Code 2.1.328 loaded it through that import line `[verified: Arch]`.
 
 ## The ecc plugin
 
@@ -198,3 +201,4 @@ python3 scripts/apply-ecc-overrides.py
 ```
 
 It disables the listed features in your Claude Code settings, keeps every other key, and is idempotent.
+The list also disables seven `ecc` skills that duplicate the workflow layer, such as `tdd-workflow` and `santa-method`, see [ADR 0020](../adr/0020-workflow-layer-adapted-from-pstack.md).
