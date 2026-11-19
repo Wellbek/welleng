@@ -32,6 +32,8 @@ Read `README.md` for the architecture and `docs/adr/` for the reasons behind eac
 - Shell scripts use `bash` with `set -euo pipefail`, quote every expansion, and stay idempotent.
 - Custom tooling is Python 3.11+, run through `uv`.
 - Prefer quality, simplicity and long-term maintainability over development cost.
+- Use `/welleng:mode` for non-trivial work in this repository, and `verify-welleng` to prove a change to the plugin, its hooks or the CLI.
+- Run `python3 -I scripts/check-skills.py` after editing a skill, and keep `claude-plugin/pstack-upstream.json` in step with adapted files.
 
 ## Git
 
@@ -47,13 +49,14 @@ Read `README.md` for the architecture and `docs/adr/` for the reasons behind eac
 Existing today:
 
 - `docs/adr/` decision records, `docs/security.md`, `docs/platforms.md`
-- `scripts/` repository hygiene, secret scanning, `install-gitleaks.sh`, `check-packages.py`, `init-secrets.sh` and `apply-ecc-overrides.py`
-- `.githooks/` pre-commit gate
+- `scripts/` repository hygiene, secret scanning, `install-gitleaks.sh`, `check-packages.py`, `init-secrets.sh`, `apply-ecc-overrides.py`, `check-skills.py`, `check-commit-msg.sh` and `pstack-upstream-diff.py`
+- `.githooks/` pre-commit and commit-msg gates
 - `packages/packages.toml` the package map, checked against pacman, apt and dnf in CI
-- `bootstrap/` installer and pinned releases, `claude-plugin/` the plugin with the `/harness` skill, `tools/` the `welleng` Python package
+- `bootstrap/` installer and pinned releases, `claude-plugin/` the plugin with `/harness`, `/welleng:mode`, the workflow skills and the `worker` and `comment-reviewer` subagents, `tools/` the `welleng` Python package
 - `.chezmoiroot` and `home/` the chezmoi source state: tmux and git config, the tpm external, `dot_config/welleng/` (credentials example, shell helpers, starship, lazygit, kitty, yazi, global Claude instructions, tmux segment, `ecc` overrides), `dot_config/welleng-nvim/`, and the Windows-only `Documents/PowerShell/` and `dot_config/wezterm/`
 - `scripts/wire-in.sh`, `scripts/uninstall.sh`, `docs/verification/` and `docs/troubleshooting.md`
+- `.claude/skills/verify-welleng/` the project verification skill, which drives a live Claude Code session on a private tmux server
 
 Planned, not created yet:
 
-- everything in `docs/verification/` that needs a device, and the checks that need a live interactive Claude Code session
+- everything in `docs/verification/` that needs a device, and live checks of the `/harness` questionnaire and the editor bridge
