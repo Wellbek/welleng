@@ -14,7 +14,7 @@ Checked files: every Markdown file under claude-plugin/skills/, claude-plugin/ag
 - Every reference resolves: `playbooks/<x>.md`, `principles/<x>.md`, `/welleng:<skill>`, `welleng:<agent>`,
   `../<skill>/SKILL.md`, any other backticked `../` path, which is relative to the skill folder, and relative Markdown
   links outside code blocks.
-- Prose keeps one sentence per line.
+- Prose keeps one sentence per line, in these files and in every other Markdown file git tracks.
 
 Standard library only. Exit code 0 when clean, 1 with one `path:line: problem` line per finding.
 """
@@ -22,6 +22,7 @@ Standard library only. Exit code 0 when clean, 1 with one `path:line: problem` l
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -184,9 +185,37 @@ class Checker:
             if not in_code:
                 self.check_sentences(path, number, line)
 
+    def tracked_markdown(self) -> list[Path]:
+        """Markdown files git tracks under the root, or none outside a git checkout."""
+        try:
+            out = subprocess.run(["git", "-C", str(self.root), "ls-files", "-z", "--", "*.md"],
+                                 capture_output=True, check=False)
+        except OSError:
+            return []
+        if out.returncode != 0:
+            return []
+        return [self.root / name for name in out.stdout.decode().split("\0") if name]
+
+    def check_prose(self, path: Path) -> None:
+        text = path.read_text(encoding="utf-8")
+        parsed = frontmatter(text)
+        skip = parsed[1] if parsed else 0
+        in_code = False
+        for number, line in enumerate(text.splitlines(), start=1):
+            if number <= skip:
+                continue
+            if line.lstrip().startswith("```"):
+                in_code = not in_code
+            elif not in_code:
+                self.check_sentences(path, number, line)
+
     def run(self) -> list[str]:
-        for path in self.files():
+        covered = set(self.files())
+        for path in sorted(covered):
             self.check_file(path)
+        for path in self.tracked_markdown():
+            if path not in covered and path.is_file():
+                self.check_prose(path)
         return self.problems
 
 

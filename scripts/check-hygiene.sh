@@ -5,8 +5,8 @@
 # Checks:
 #   - no em dash character in any text file (use a plain dash)
 #   - no secrets.env or .env style file is tracked
-#   - the shipped skills, agents and playbooks pass scripts/check-skills.py (ADR 0020),
-#     which always reads the working tree
+#   - the shipped skills, agents and playbooks pass scripts/check-skills.py (ADR 0020), which also checks
+#     that every tracked Markdown file keeps one sentence per line, and always reads the working tree
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"

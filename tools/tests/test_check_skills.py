@@ -102,3 +102,15 @@ def test_an_unquoted_colon_in_a_description_is_rejected(tmp_path):
     assert code == 1 and "quote the description" in err
     write_skill(root, "why", GOOD_SKILL.format(name="why").replace("Does one thing. Use for /welleng:why.", '"Does one thing: well."'))
     assert check(root)[0] == 0
+
+
+def test_every_tracked_markdown_file_keeps_one_sentence_per_line(tmp_path):
+    root = tree(tmp_path)
+    subprocess.run(["git", "init", "-q", str(root)], check=True)
+    (root / "README.md").write_text("# Title\n\nOne sentence.\nAnother one.\n")
+    (root / "notes.md").write_text("Untracked. Not checked.\n")
+    subprocess.run(["git", "-C", str(root), "add", "README.md"], check=True)
+    assert check(root)[0] == 0
+    (root / "README.md").write_text("# Title\n\nOne sentence. Another one.\n")
+    code, err = check(root)
+    assert code == 1 and "README.md:3" in err and "notes.md" not in err
