@@ -52,6 +52,9 @@ def run(repo: Path, home: Path, yes: bool) -> int:
     base = ["chezmoi", "--source", str(repo), "--destination", str(home)]
     if have_chezmoi:
         drift = subprocess.run([*base, "diff", "--recursive", "--exclude=externals", *chezmoi_args(repo, home)], capture_output=True, text=True, check=False)
+        if drift.returncode != 0:
+            print("update: chezmoi diff failed, nothing was changed: " + drift.stderr.strip())
+            return 1
         print("deployed files differ from the repository:" if drift.stdout.strip() else "deployed files match the repository")
         if drift.stdout.strip():
             print(drift.stdout)
