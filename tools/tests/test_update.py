@@ -120,3 +120,22 @@ def test_dry_run_reports_drift_inside_deployed_directories_with_real_chezmoi(tmp
     assert update.run(clone, home, yes=False) == 0
     assert "deployed files differ from the repository" in capsys.readouterr().out
     assert deployed.read_text() == "old\n"
+
+
+def test_a_failing_chezmoi_diff_stops_the_update_instead_of_reporting_no_drift(tmp_path, capsys):
+    import shutil
+
+    import pytest
+
+    if shutil.which("chezmoi") is None:
+        pytest.skip("chezmoi not installed")
+    _, clone = make_pair(tmp_path)
+    (clone / ".chezmoiroot").write_text("home\n")
+    (clone / "home" / "dot_config" / "welleng").mkdir(parents=True)
+    (clone / "home" / "dot_config" / "welleng" / "x.md").write_text("x\n")
+    git(clone, "add", "-A")
+    git(clone, "commit", "-q", "-m", "source without the nvim directory")
+    assert update.run(clone, tmp_path / "home", yes=True) == 1
+    out = capsys.readouterr().out
+    assert "chezmoi diff failed" in out and "deployed files match" not in out
+    assert not (tmp_path / "home" / ".config" / "welleng" / "x.md").exists()
