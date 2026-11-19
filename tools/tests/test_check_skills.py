@@ -16,7 +16,7 @@ disable-model-invocation: true
 # {name}
 
 Read `playbooks/bug-fix.md`, `principles/prove-it-works.md` and `../mode/SKILL.md` first.
-Then spawn `welleng:worker`.
+Then spawn `welleng:worker`, and keep `<!-- welleng:begin rules -->` blocks.
 """
 
 

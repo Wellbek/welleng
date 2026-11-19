@@ -37,7 +37,7 @@ FORBIDDEN = [
 
 PLAYBOOK_REF = re.compile(r"\b(playbooks|principles)/([a-z0-9-]+)\.md")
 SKILL_REF = re.compile(r"/welleng:([a-z0-9-]+)")
-AGENT_REF = re.compile(r"(?<![/\w])welleng:([a-z0-9-]+)")
+AGENT_REF = re.compile(r"(?<![/\w])(?<!<!-- )welleng:([a-z0-9-]+)")
 SIBLING_REF = re.compile(r"\.\./([a-z0-9-]+)/SKILL\.md")
 RELATIVE_REF = re.compile(r"`(\.\./[A-Za-z0-9_./-]+\.[a-z]+)`")
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)\)")
