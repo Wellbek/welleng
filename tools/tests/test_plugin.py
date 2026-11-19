@@ -45,3 +45,26 @@ def test_manifests_are_valid():
     assert "SessionStart" in hooks["hooks"]
     skill = (PLUGIN / "skills" / "harness" / "SKILL.md").read_text()
     assert skill.startswith("---\nname: harness\n")
+
+
+def test_every_adapted_file_is_listed_and_every_listed_file_exists():
+    upstream = json.loads((PLUGIN / "pstack-upstream.json").read_text())
+    assert len(upstream["commit"]) == 40
+    listed = {PLUGIN.parent / local for local in upstream["files"].values()}
+    assert all(path.exists() for path in listed), [str(p) for p in listed if not p.exists()]
+    own = {"harness"}
+    for skill in sorted((PLUGIN / "skills").iterdir()):
+        if skill.name not in own:
+            assert skill / "SKILL.md" in listed, f"{skill.name} is not in pstack-upstream.json"
+    for agent in sorted((PLUGIN / "agents").glob("*.md")):
+        assert agent in listed, f"{agent.name} is not in pstack-upstream.json"
+    assert "MIT License" in (PLUGIN / "THIRD_PARTY_NOTICES.md").read_text()
+
+
+def test_the_mode_skill_lists_every_playbook():
+    mode = PLUGIN / "skills" / "mode"
+    text = (mode / "SKILL.md").read_text()
+    for playbook in sorted((mode / "playbooks").glob("*.md")):
+        assert f"`playbooks/{playbook.name}`" in text, playbook.name
+    for principle in sorted((mode / "principles").glob("*.md")):
+        assert f"`principles/{principle.name}`" in text, principle.name
