@@ -39,3 +39,11 @@ def test_global_claude_instructions_follow_the_rules():
     assert chr(0x2014) not in text
     assert "@~/.config/welleng/claude/CLAUDE.md" in text
     assert "~/.claude/CLAUDE.md" in text
+
+
+def test_global_claude_instructions_put_safety_before_autonomy():
+    text = (CONFIG / "claude" / "CLAUDE.md").read_text(encoding="utf-8")
+    assert text.index("## Safety") < text.index("## Autonomy")
+    autonomy = text[text.index("## Autonomy") : text.index("## Working style")]
+    assert "safety rules above win" in autonomy
+    assert "/welleng:mode" in text
