@@ -43,7 +43,9 @@ Ask only the ones that apply, in this order:
 3. Write the intents as JSON to a temporary file outside the project.
    The format is documented at the top of `tools/src/welleng/harness.py`, an example is:
    `{"intents": [{"kind": "deny", "rules": ["Read(**/.env)"]}]}`
-4. Run `welleng harness plan SPEC.json` and show the user the output.
+4. Run `welleng harness plan SPEC.json` and paste its output in your reply, verbatim, inside a `diff` code block.
+   Claude Code collapses tool output, so the user sees the diffs only if your reply contains them.
+   A one-line summary per file may follow the block, but never replaces it.
 5. Ask whether to apply it.
    Only after a clear yes, run `welleng harness apply SPEC.json --yes`.
 6. Run `welleng harness check` and report the result, including its notes.
