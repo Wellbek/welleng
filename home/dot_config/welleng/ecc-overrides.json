@@ -38,6 +38,13 @@
     { "name": "model-route", "reason": "Duplicates the effort recommendation feature, which is hook and status line based." },
     { "name": "cost-tracking", "reason": "Reads the cost tracker log, which is disabled, and duplicates dashboard cost columns." },
     { "name": "cost-report", "reason": "Reads the cost tracker log, which is disabled, and duplicates dashboard cost columns." },
-    { "name": "dmux-workflows", "reason": "Multi-agent orchestration over tmux panes, which overlaps tmux layout ownership and the agents dashboard." }
+    { "name": "dmux-workflows", "reason": "Multi-agent orchestration over tmux panes, which overlaps tmux layout ownership and the agents dashboard." },
+    { "name": "tdd-workflow", "reason": "Duplicates /welleng:tdd, and its 80% coverage rule conflicts with preferring no test over a bad test (ADR 0020)." },
+    { "name": "verification-loop", "reason": "Duplicates the verification rules of /welleng:mode and its opening-a-pr playbook (ADR 0020)." },
+    { "name": "santa-method", "reason": "Duplicates /welleng:interrogate, adversarial review with proven findings (ADR 0020)." },
+    { "name": "autonomous-loops", "reason": "Duplicates the autonomous-run playbook of /welleng:mode (ADR 0020)." },
+    { "name": "continuous-agent-loop", "reason": "Duplicates the autonomous-run playbook of /welleng:mode (ADR 0020)." },
+    { "name": "blueprint", "reason": "Duplicates the multi-phase-plan playbook of /welleng:mode (ADR 0020)." },
+    { "name": "agentic-engineering", "reason": "Duplicates /welleng:mode and its role table, a second operating model with its own model routing (ADR 0020)." }
   ]
 }
