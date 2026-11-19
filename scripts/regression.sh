@@ -51,7 +51,7 @@ stage_secrets() {
 }
 stage_shell() {
   local files=()
-  while IFS= read -r f; do files+=("$f"); done < <(git ls-files 'scripts/*.sh' '.githooks/*' 'tests/*.sh' 'tests/*/*.sh' 'bootstrap/*.sh')
+  while IFS= read -r f; do files+=("$f"); done < <(git ls-files 'scripts/*.sh' '.githooks/*' 'tests/*.sh' 'tests/*/*.sh' 'bootstrap/*.sh' '.claude/skills/*/scripts/*.sh')
   for f in "${files[@]}"; do bash -n "$f"; done
   if command -v shellcheck >/dev/null 2>&1; then
     shellcheck -x "${files[@]}"

@@ -69,7 +69,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Syntax check
         run: |
-          for f in scripts/*.sh bootstrap/*.sh .githooks/pre-commit .githooks/commit-msg tests/*.sh tests/*/*.sh; do
+          for f in scripts/*.sh bootstrap/*.sh .githooks/pre-commit .githooks/commit-msg tests/*.sh tests/*/*.sh .claude/skills/*/scripts/*.sh; do
             bash -n "$f"
           done
       - name: PowerShell syntax
@@ -90,7 +90,7 @@ jobs:
           sudo apt-get install -y -qq lua5.4
           luac5.4 -p home/dot_config/wezterm/wezterm.lua
       - name: ShellCheck
-        run: shellcheck scripts/*.sh bootstrap/*.sh .githooks/pre-commit .githooks/commit-msg tests/*.sh tests/*/*.sh
+        run: shellcheck scripts/*.sh bootstrap/*.sh .githooks/pre-commit .githooks/commit-msg tests/*.sh tests/*/*.sh .claude/skills/*/scripts/*.sh
 
   regression:
     name: Regression (Arch container)
