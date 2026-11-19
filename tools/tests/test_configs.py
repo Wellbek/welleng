@@ -47,3 +47,10 @@ def test_global_claude_instructions_put_safety_before_autonomy():
     autonomy = text[text.index("## Autonomy") : text.index("## Working style")]
     assert "safety rules above win" in autonomy
     assert "/welleng:mode" in text
+
+
+def test_lazygit_config_uses_the_current_schema():
+    # lazygit 0.66 rewrites the deprecated git.paging key into git.diffRenderers on start-up, which made the
+    # deployed file drift from the repository.
+    text = (CONFIG / "lazygit.yml").read_text(encoding="utf-8")
+    assert "diffRenderers:" in text and "paging:" not in text.replace("--paging=never", "")
