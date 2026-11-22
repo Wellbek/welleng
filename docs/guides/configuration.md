@@ -75,8 +75,9 @@ It keeps the prefix `M-o` (Alt and o).
 Keys are listed in [terminal and editor](terminal-and-editor.md#tmux).
 
 The "waiting" counter in the status line is a separate file, `~/.config/welleng/tmux-agents.conf`, loaded with `source-file -q`.
+It calls `~/.config/welleng/tmux-waiting.sh`, a script, because a closing parenthesis inside a tmux `#()` command ends the command early.
 It shows `waiting:N` when N Claude sessions wait for you, and nothing otherwise.
-Add the line yourself if you do not use the full `dot_tmux.conf`:
+Add the line yourself if you do not use the full `dot_tmux.conf`, and deploy both files:
 
 ```
 source-file -q ~/.config/welleng/tmux-agents.conf
