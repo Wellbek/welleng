@@ -217,4 +217,5 @@ Details are in [docs/security.md](docs/security.md).
 
 ## License
 
-No license has been chosen yet, so all rights are reserved.
+MIT, see [LICENSE](LICENSE).
+The workflow skills are adapted from pstack, also MIT, see [the third-party notices](claude-plugin/THIRD_PARTY_NOTICES.md).

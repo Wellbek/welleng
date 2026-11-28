@@ -2,5 +2,6 @@
   "name": "welleng-hooks",
   "version": "0.1.0",
   "description": "Well-Engineering hooks: the welleng:harness suggestion, effort hints, the session state writer and the opt-in status line script. Needs python3 and is meant for the full setup",
-  "author": { "name": "Well-Engineering" }
+  "author": { "name": "Well-Engineering" },
+  "license": "MIT"
 }
