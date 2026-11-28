@@ -113,7 +113,9 @@ Safety properties, all covered by unit tests on Arch:
 
 The hooks alone give model, effort and subagent count.
 Context use and cost come only from the status line, which the plugin does not set because it would replace yours.
-To opt in, put this in your own Claude Code settings, with the real path:
+To opt in, run `scripts/enable-statusline.py` from the clone, with `--dry-run` first.
+It sets only the `statusLine` key in `~/.claude/settings.json` to the script of that clone, updates an older welleng path, and keeps a status line of your own unless you pass `--force`.
+The result is the same as writing this by hand:
 
 ```json
 "statusLine": {"type": "command", "command": "python3 -I /path/to/welleng/claude-plugin-hooks/hooks/statusline.py"}

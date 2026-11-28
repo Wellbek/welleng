@@ -91,14 +91,16 @@ uv tool install --editable ~/.local/share/welleng/tools   # welleng agents, hint
 welleng doctor --claude                                     # both plugins should be listed
 ```
 
-Then add the status line to your own `~/.claude/settings.json`, with your real home directory in place of `/home/you`:
+Then turn on the status line, which sets only the `statusLine` key in `~/.claude/settings.json`:
 
-```json
-"statusLine": {"type": "command", "command": "python3 -I /home/you/.local/share/welleng/claude-plugin-hooks/hooks/statusline.py"}
+```sh
+~/.local/share/welleng/scripts/enable-statusline.py --dry-run
+~/.local/share/welleng/scripts/enable-statusline.py
 ```
 
 - Effort hints read the effort level from the status line, so without it they stay silent, see [ADR 0021](docs/adr/0021-effort-level-from-the-status-line-state.md).
-- If you already have a status line, call `statusline.py` from your own script instead of replacing it.
+- An existing status line of your own is kept unless you pass `--force`, you can also call `statusline.py` from your own script.
+  `--remove` takes the welleng one out again.
 - Update with `git -C ~/.local/share/welleng pull`, then `claude plugin marketplace update welleng-local` and `claude plugin update` for both plugins.
 - What each hook does is in [Claude Code](docs/guides/claude-code.md#install-the-plugins).
 
@@ -123,7 +125,7 @@ claude plugin install welleng@welleng-local
 claude plugin install welleng-hooks@welleng-local
 ```
 
-Then add the status line as in option 2, with the path of this clone.
+Then turn on the status line with `scripts/enable-statusline.py`, as in option 2.
 
 Credentials are all optional, see [configuration](docs/guides/configuration.md#credentials).
 
