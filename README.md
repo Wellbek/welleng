@@ -1,12 +1,9 @@
 # Well-Engineering
 
-A reproducible, terminal-centric and AI-native development environment for Linux and WSL2, with native Windows as a best-effort fallback.
-One Git repository installs the shell, tmux, Neovim, Git tooling and a Claude Code plugin, and keeps them working together.
+My portable, terminal-based and AI-native development environment for Linux and WSL2, with native Windows as a fallback.
+Holds entire installs for the shell, tmux, Neovim, Git tooling and a Claude Code plugins, and ensuring they are cleanly connected out of the box.
 
-**Status: early, Linux first.**
-Tested on Arch Linux and in Ubuntu, Fedora and Arch containers.
-Not yet verified: native Windows, WSL2, macOS, phone access and the editor bridge.
-[CHECKLIST.md](CHECKLIST.md) is the source of truth for what exists and on which platform it was tested.
+([CHECKLIST.md](CHECKLIST.md) is the source of truth for what exists and on which platform it was tested.)
 
 ## Claude Code skills
 
