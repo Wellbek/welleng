@@ -10,7 +10,7 @@
 
 ## How to get to it (user POV)
 
-- Run `/harness` in a session, which calls these commands, or run them directly.
+- Run `/welleng:harness` in a session, which calls these commands, or run them directly.
 
 ## Driving it with the shell
 

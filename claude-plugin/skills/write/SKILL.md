@@ -84,7 +84,7 @@ Keep the meaning and the intended tone.
 14. No generic conclusion.
     End on a specific plan or fact.
 15. No abstract metaphor nouns such as substrate, wedge, nexus, paradigm, flywheel or north star.
-    Product names such as `/harness` are fine.
+    Product names such as `/welleng:harness` are fine.
 16. Say what something does, not how it feels.
     Cut any sentence that could appear unchanged in another project's docs.
 17. Write whole sentences, and spell out arrows and abbreviations.

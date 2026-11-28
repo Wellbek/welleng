@@ -12,11 +12,10 @@ Not yet verified: native Windows, WSL2, macOS, phone access and the editor bridg
 
 The `welleng` plugin ships these skills.
 Type them as `/welleng:<name>`, they cost no context until used.
-`/harness` is the exception, it has no prefix.
 
 | Skill | What it does |
 |---|---|
-| `/harness` | Sets up a project's Claude Code config through a short questionnaire, shows a diff, writes nothing until you approve |
+| `/welleng:harness` | Sets up a project's Claude Code config through a short questionnaire, shows a diff, writes nothing until you approve |
 | `/welleng:mode` | Rigorous mode for any non-trivial task: picks a playbook, delegates to subagents, proves the work on the real artifact |
 | `/welleng:in-your-own-words` | Plays back your goal and the problem behind it before any work starts |
 | `/welleng:sharpen` | Rewrites a prompt to be deeper, without doing the task |

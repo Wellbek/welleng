@@ -22,7 +22,7 @@ def test_suggests_in_a_bare_git_project(tmp_path):
     (tmp_path / ".git").mkdir()
     out = json.loads(run(event(tmp_path)))
     assert out["hookSpecificOutput"]["hookEventName"] == "SessionStart"
-    assert "/harness" in out["hookSpecificOutput"]["additionalContext"]
+    assert "/welleng:harness" in out["hookSpecificOutput"]["additionalContext"]
 
 
 def test_silent_when_configured_or_not_a_repo_or_not_startup(tmp_path):

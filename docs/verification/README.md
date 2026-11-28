@@ -10,4 +10,4 @@ A feature stays "implemented, verification pending" until its procedure has been
 | [windows.md](windows.md) | A Windows 11 machine | `bootstrap/install.ps1`, native fallback, psmux |
 | [wsl2.md](wsl2.md) | Windows 11 with WSL2 | The first-class Windows path |
 | [phone.md](phone.md) | A phone with the Claude app | Remote Control and the port check |
-| [interactive.md](interactive.md) | An interactive Claude Code session | Hooks, effort hints and the `/harness` skill |
+| [interactive.md](interactive.md) | An interactive Claude Code session | Hooks, effort hints and the `/welleng:harness` skill |

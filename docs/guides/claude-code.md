@@ -5,7 +5,7 @@ It never parses files under `~/.claude/`, see [ADR 0005](../adr/0005-official-cl
 
 Verification status: the plugin validates, its hooks ran headless on Claude Code 2.1.325, and effort hints, the status line and the state writer ran in a live interactive session on Claude Code 2.1.328, all on Arch.
 The `/welleng:mode` skill and the `welleng:worker` subagent ran headless on 2.1.328 on Arch.
-The `/harness` questionnaire ran in a live interactive session on 2.1.328 on Arch.
+The `/welleng:harness` questionnaire ran in a live interactive session on 2.1.328 on Arch.
 The editor bridge has not been verified interactively, see [docs/verification/interactive.md](../verification/interactive.md).
 
 ## Install the plugin
@@ -18,17 +18,17 @@ claude plugin install welleng@welleng-local
 claude plugin list
 ```
 
-The `/harness` skill needs the `welleng` command on `PATH`, see [installation](installation.md#3-install-the-welleng-command).
+The `/welleng:harness` skill needs the `welleng` command on `PATH`, see [installation](installation.md#3-install-the-welleng-command).
 Validate the plugin yourself with `claude plugin validate claude-plugin`.
 
 The plugin contains:
 
 | Part | What it does |
 |---|---|
-| `/harness` skill | Questionnaire that sets up a project's Claude Code configuration |
+| `/welleng:harness` skill | Questionnaire that sets up a project's Claude Code configuration |
 | `/welleng:mode` and the workflow skills | Playbooks, principles and subagent roles for rigorous engineering work, see [the workflow guide](workflow.md) |
 | `welleng:worker` and `welleng:comment-reviewer` subagents | Delegates that carry the Well-Engineering rules, used by the workflow skills |
-| `SessionStart` hook | Suggests `/harness` once in a git repository that has no `CLAUDE.md` and no `.claude/settings.json` |
+| `SessionStart` hook | Suggests `/welleng:harness` once in a git repository that has no `CLAUDE.md` and no `.claude/settings.json` |
 | `UserPromptSubmit` hook | Effort hints |
 | State writer hooks | Record per-session model, effort and subagents for the dashboard |
 
@@ -37,7 +37,7 @@ Each runs as a direct `python3 -I` call, not through your shell.
 
 ## The harness skill
 
-Run `/harness` in a project.
+Run `/welleng:harness` in a project.
 It asks one short question at a time and accepts `-`, `skip` or `s` to skip.
 It never writes anything before you have seen a plan with diffs and said yes.
 It never asks for or writes a credential: for a service it asks for the name of the environment variable and writes a `${NAME}` reference.

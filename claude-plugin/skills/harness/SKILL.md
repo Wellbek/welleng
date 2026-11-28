@@ -1,6 +1,6 @@
 ---
 name: harness
-description: Set up or update a project's Claude Code configuration (CLAUDE.md conventions, permissions, hooks, MCP servers) through a short questionnaire, with a diff preview and nothing written until approved. Use when the user runs /harness or asks to set up agent configuration for a project.
+description: Set up or update a project's Claude Code configuration (CLAUDE.md conventions, permissions, hooks, MCP servers) through a short questionnaire, with a diff preview and nothing written until approved. Use when the user runs /welleng:harness or asks to set up agent configuration for a project.
 ---
 
 # Project harness

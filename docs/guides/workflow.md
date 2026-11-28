@@ -47,7 +47,7 @@ To change one, create `~/.config/welleng/roles.md` with lines such as `code: opu
 
 ## Per project
 
-`/harness` asks whether to use the workflow in a project, and whether to keep a rules table that pairs each rule with what enforces it.
+`/welleng:harness` asks whether to use the workflow in a project, and whether to keep a rules table that pairs each rule with what enforces it.
 `welleng harness check` prints a note when a project has no verification skill.
 
 ## Keeping up with upstream

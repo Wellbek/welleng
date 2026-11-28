@@ -6,7 +6,7 @@
     {
       "name": "welleng",
       "source": "./claude-plugin",
-      "description": "Well-Engineering: the /harness project setup skill, the /welleng:mode workflow layer, effort hints and session state hooks"
+      "description": "Well-Engineering: the /welleng:harness project setup skill, the /welleng:mode workflow layer, effort hints and session state hooks"
     }
   ]
 }

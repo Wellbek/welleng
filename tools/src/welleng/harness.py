@@ -1,6 +1,6 @@
 """Plan, apply and check a project's Claude Code configuration from a list of intents.
 
-The `/harness` skill collects answers and writes them as a JSON spec.
+The `/welleng:harness` skill collects answers and writes them as a JSON spec.
 This module turns the spec into exact file changes, shows them as diffs, and writes nothing until
 `apply` is called.
 Generated Markdown lives in delimited blocks so a rerun replaces only its own text.

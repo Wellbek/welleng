@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SessionStart hook: suggest /harness once when a project has no agent configuration.
+"""SessionStart hook: suggest /welleng:harness once when a project has no agent configuration.
 
 Reads the hook event from stdin and prints one JSON object, or nothing.
 Never raises: a hook failure must not disturb a session, and nothing but the JSON object may be
@@ -15,7 +15,7 @@ from pathlib import Path
 
 MESSAGE = (
     "This project has no CLAUDE.md and no .claude/settings.json yet. "
-    "If the user wants agent conventions, permissions or hooks set up, mention that the /harness "
+    "If the user wants agent conventions, permissions or hooks set up, mention that the /welleng:harness "
     "skill can do it with a short questionnaire. Mention it at most once and do not start it unprompted."
 )
 
