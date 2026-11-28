@@ -102,8 +102,10 @@ Check it yourself, before and after starting Remote Control:
 
 ```sh
 welleng rc --ports snapshot     # record listening sockets
-welleng rc --ports diff         # compare, exit code 1 on any new non-loopback listener
+welleng rc --ports diff         # compare, exit code 1 on any new listener outside loopback and the tailnet
 ```
+
+Listeners bound to Tailscale addresses, `100.64.0.0/10` and `fd7a:115c:a1e0::/48`, are reported as tailnet-only and do not fail the check, because tailscaled opens them for your own devices.
 
 The port check needs Linux with `ss`.
 Keep permission prompts on, approvals are the safety boundary, see [security](../security.md).

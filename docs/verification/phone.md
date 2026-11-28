@@ -30,7 +30,7 @@ Run each part once with an iPhone and once with an Android phone, and record whi
 1. Run `scripts/phone-ssh.sh`, then `install --yes` and `on --yes` as the guide describes.
    Expected: status shows `state Running`, `ssh yes` and a `connect` line.
 2. Run `welleng rc --ports snapshot` before step 1 and `welleng rc --ports diff` after it.
-   Expected: any new listener is on a `100.` tailnet address or loopback only, record what appears.
+   Expected: `ports check: ok`, with any new listener reported as loopback or tailnet-only.
 3. On the phone, turn on Tailscale and connect with the SSH client to the `connect` line.
    Expected: a sign-in URL in check mode, then a shell as your user.
 4. Run `tmux attach -t` with a session from `tmux ls`.

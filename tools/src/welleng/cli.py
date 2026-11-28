@@ -120,9 +120,11 @@ def main(argv: list[str] | None = None) -> int:
             if not rc.snapshot_path(directory).is_file():
                 print("rc: no snapshot, run `welleng rc --ports snapshot` first", file=sys.stderr)
                 return 1
-            loopback, exposed = rc.diff(directory, current)
+            loopback, tailnet, exposed = rc.diff(directory, current)
             for a in loopback:
                 print(f"new loopback listener: {a}")
+            for a in tailnet:
+                print(f"new tailnet-only listener: {a}")
             for a in exposed:
                 print(f"NEW EXPOSED LISTENER: {a}")
             print("ports check: ok" if not exposed else "ports check: FAILED, something is listening on a non-loopback address")

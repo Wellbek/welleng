@@ -28,8 +28,17 @@ def test_diff_separates_exposed_listeners(tmp_path):
     before = rc.parse_listeners(SS)
     rc.save_snapshot(tmp_path, before)
     after = before | {"127.0.0.1:9000", "0.0.0.0:7777"}
-    assert rc.diff(tmp_path, after) == (["127.0.0.1:9000"], ["0.0.0.0:7777"])
-    assert rc.diff(tmp_path, before) == ([], [])
+    assert rc.diff(tmp_path, after) == (["127.0.0.1:9000"], [], ["0.0.0.0:7777"])
+    assert rc.diff(tmp_path, before) == ([], [], [])
+
+
+def test_tailscale_listeners_are_tailnet_only_and_not_exposed(tmp_path):
+    rc.save_snapshot(tmp_path, set())
+    v4, v6 = "100.108.230.108%tailscale0:37455", "[fd7a:115c:a1e0::3149:e66d]%tailscale0:42706"
+    lan, cgnat_edge = "192.168.1.5:8000", "100.128.0.1:80"
+    assert rc.is_tailnet(v4) and rc.is_tailnet(v6) and rc.is_tailnet("100.64.0.1:1")
+    assert not rc.is_tailnet(lan) and not rc.is_tailnet(cgnat_edge) and not rc.is_tailnet("*:22")
+    assert rc.diff(tmp_path, {v4, v6, lan}) == ([], sorted([v4, v6]), [lan])
 
 
 def test_cli_rc_outside_tmux_fails_cleanly(monkeypatch, capsys):

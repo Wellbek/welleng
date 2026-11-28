@@ -6,6 +6,7 @@ here proves it on this machine: no new non-loopback listener may appear while it
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import os
 import shlex
@@ -13,6 +14,8 @@ import subprocess
 from pathlib import Path
 
 LOOPBACK = ("127.", "[::1]", "::1")
+# Tailscale's address ranges: a socket bound to one is reachable from the tailnet only, never from the LAN.
+TAILNET = (ipaddress.ip_network("100.64.0.0/10"), ipaddress.ip_network("fd7a:115c:a1e0::/48"))
 
 
 def window_command(name: str | None, permission_mode: str = "default") -> list[str]:
@@ -53,6 +56,16 @@ def is_loopback(address: str) -> bool:
     return address.startswith(LOOPBACK)
 
 
+def is_tailnet(address: str) -> bool:
+    """True for a listener bound to a Tailscale address, such as `100.101.102.103%tailscale0:41641`."""
+    host = address.rsplit(":", 1)[0].strip("[]").split("%", 1)[0].strip("[]")
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return any(ip in net for net in TAILNET)
+
+
 def snapshot_path(directory: Path) -> Path:
     return directory / "ports-before.json"
 
@@ -62,8 +75,11 @@ def save_snapshot(directory: Path, current: set[str]) -> None:
     snapshot_path(directory).write_text(json.dumps(sorted(current)), encoding="utf-8")
 
 
-def diff(directory: Path, current: set[str]) -> tuple[list[str], list[str]]:
-    """Return (new loopback listeners, new exposed listeners) since the snapshot."""
+def diff(directory: Path, current: set[str]) -> tuple[list[str], list[str], list[str]]:
+    """Return (new loopback, new tailnet-only, new exposed listeners) since the snapshot."""
     before = set(json.loads(snapshot_path(directory).read_text(encoding="utf-8")))
     new = sorted(current - before)
-    return [a for a in new if is_loopback(a)], [a for a in new if not is_loopback(a)]
+    loopback = [a for a in new if is_loopback(a)]
+    tailnet = [a for a in new if not is_loopback(a) and is_tailnet(a)]
+    exposed = [a for a in new if a not in loopback and a not in tailnet]
+    return loopback, tailnet, exposed
