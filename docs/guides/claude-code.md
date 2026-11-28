@@ -24,7 +24,8 @@ claude plugin install welleng-hooks@welleng-local          # full setup only
 claude plugin list
 ```
 
-Someone who only wants the skills installs `welleng` and skips `welleng-hooks`, see [just the skills](../../README.md#just-the-skills).
+Someone who only wants the skills installs `welleng` and skips `welleng-hooks`.
+The three install options, skills only, skills and hooks, and the full setup, are in the [README](../../README.md#install).
 
 The `/welleng:harness` skill needs the `welleng` command on `PATH`, see [installation](installation.md#3-install-the-welleng-command).
 Validate them yourself with `claude plugin validate claude-plugin` and `claude plugin validate claude-plugin-hooks`.

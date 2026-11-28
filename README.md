@@ -12,7 +12,7 @@ Not yet verified: native Windows, WSL2, macOS, phone access and the editor bridg
 
 The `welleng` plugin ships these skills.
 Type them as `/welleng:<name>`, they cost no context until used.
-The plugin has no hooks and needs nothing but Claude Code, so it can be installed without the rest of this repository, see [just the skills](#just-the-skills).
+The plugin has no hooks and needs nothing but Claude Code, so it can be installed without the rest of this repository, see [option 1](#option-1-the-skills).
 
 | Skill | What it does |
 |---|---|
@@ -44,9 +44,20 @@ The plugin has no hooks and needs nothing but Claude Code, so it can be installe
 This repository also has one project skill, `verify-welleng`, which drives a live Claude Code session to verify the plugin, its hooks and the CLI.
 See the [workflow guide](docs/guides/workflow.md) for how the skills fit together.
 
-## Just the skills
+## Install
 
-To use the skills without the terminal setup, add this repository as a plugin marketplace and install only the `welleng` plugin.
+Pick one of three options.
+Each later option includes the earlier ones.
+
+| Option | You get | Changes on your machine |
+|---|---|---|
+| [1. The skills](#option-1-the-skills) | Every `/welleng:` skill and the two subagents | One Claude Code plugin, no clone |
+| [2. The skills and the hooks](#option-2-the-skills-and-the-hooks) | Also effort hints, the status line, the `welleng` command and its session dashboard | A clone, two plugins, one `uv` tool and optionally one settings entry |
+| [3. The full development setup](#option-3-the-full-development-setup) | Also the shell, tmux, Neovim, Git tooling and remote access | Packages and the configuration under `$HOME`, with backups |
+
+### Option 1: the skills
+
+Add this repository as a plugin marketplace and install only the `welleng` plugin.
 Nothing is cloned by hand, and nothing in your shell, tmux or editor changes.
 
 ```sh
@@ -58,15 +69,42 @@ Inside a running session the same works as `/plugin marketplace add Wellbek/well
 Update later with `claude plugin marketplace update welleng-local` and `claude plugin update welleng@welleng-local`.
 
 - Every skill except `/welleng:harness` works on its own.
-  `/welleng:harness` also needs the `welleng` command, install it with `uv tool install "git+https://github.com/Wellbek/welleng#subdirectory=tools"`.
+  `/welleng:harness` also needs the `welleng` command: `uv tool install "git+https://github.com/Wellbek/welleng#subdirectory=tools"`.
 - `/welleng:show-me-your-work` runs a small helper with `python3`.
-- The hooks for effort hints and the session dashboard are a separate plugin, `welleng-hooks`, which only the full setup needs.
-- The repository must be readable for the person installing, a private repository needs their own GitHub access `[docs]`.
+- The plugin has no hooks, so nothing runs unless you call a skill, see [ADR 0022](docs/adr/0022-skills-plugin-without-hooks.md).
 
 Tested by installing from a local clone into an empty Claude Code config on WSL2 Ubuntu: 24 skills, 2 subagents and no hooks were loaded.
 Installing from GitHub by `owner/repo` has not been run.
 
-## Quick start
+### Option 2: the skills and the hooks
+
+The hooks add effort hints and per-session state, and the `welleng` command reads that state.
+This needs `python3`, `git`, `uv` and a clone at a stable path, because the status line runs a script from it.
+Your shell, tmux and editor stay untouched.
+
+```sh
+git clone https://github.com/Wellbek/welleng.git ~/.local/share/welleng
+claude plugin marketplace add ~/.local/share/welleng
+claude plugin install welleng@welleng-local
+claude plugin install welleng-hooks@welleng-local
+uv tool install --editable ~/.local/share/welleng/tools   # welleng agents, hints, harness and doctor
+welleng doctor --claude                                     # both plugins should be listed
+```
+
+Then add the status line to your own `~/.claude/settings.json`, with your real home directory in place of `/home/you`:
+
+```json
+"statusLine": {"type": "command", "command": "python3 -I /home/you/.local/share/welleng/claude-plugin-hooks/hooks/statusline.py"}
+```
+
+- Effort hints read the effort level from the status line, so without it they stay silent, see [ADR 0021](docs/adr/0021-effort-level-from-the-status-line-state.md).
+- If you already have a status line, call `statusline.py` from your own script instead of replacing it.
+- Update with `git -C ~/.local/share/welleng pull`, then `claude plugin marketplace update welleng-local` and `claude plugin update` for both plugins.
+- What each hook does is in [Claude Code](docs/guides/claude-code.md#install-the-plugins).
+
+This option as a whole has not been run on a clean machine.
+
+### Option 3: the full development setup
 
 On Linux or inside WSL2.
 Every step has a dry run, and the [installation guide](docs/guides/installation.md) explains each one.
@@ -80,10 +118,12 @@ uv tool install --editable tools      # the welleng command
 welleng doctor                        # what is installed and what is missing
 chezmoi init --apply --source .       # deploy the configuration, read `chezmoi diff` first
 scripts/wire-in.sh --dry-run          # optional: connect an existing zsh, tmux and SSH setup
-claude plugin marketplace add .       # optional: the Claude Code plugins
+claude plugin marketplace add .       # the Claude Code plugins, as in option 2
 claude plugin install welleng@welleng-local
 claude plugin install welleng-hooks@welleng-local
 ```
+
+Then add the status line as in option 2, with the path of this clone.
 
 Credentials are all optional, see [configuration](docs/guides/configuration.md#credentials).
 

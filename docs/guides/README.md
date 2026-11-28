@@ -24,5 +24,6 @@ For problems, read [troubleshooting](../troubleshooting.md).
 |---|---|
 | Everything, on a fresh Linux machine | [Installation](installation.md), the full flow |
 | Only the `welleng` commands | `uv tool install --editable tools`, then [commands](commands.md) |
-| Only the Claude Code skills | [Just the skills](../../README.md#just-the-skills) |
+| Only the Claude Code skills | [Option 1](../../README.md#option-1-the-skills) |
+| The skills, the hooks and the `welleng` command, without the terminal setup | [Option 2](../../README.md#option-2-the-skills-and-the-hooks) |
 | To keep your current zsh, tmux and SSH setup untouched | [Installation](installation.md#connect-an-existing-setup), the wire-in is reversible and changes nothing until you run it |
