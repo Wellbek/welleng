@@ -7,7 +7,7 @@ from pathlib import Path
 
 from welleng import cli, hints
 
-HOOK = Path(__file__).resolve().parents[2] / "claude-plugin" / "hooks" / "effort_hint.py"
+HOOK = Path(__file__).resolve().parents[2] / "claude-plugin-hooks" / "hooks" / "effort_hint.py"
 SPEC = importlib.util.spec_from_file_location("effort_hint", HOOK)
 eh = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(eh)

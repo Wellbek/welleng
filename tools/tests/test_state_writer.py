@@ -7,7 +7,7 @@ from pathlib import Path
 
 from welleng import agents
 
-HOOKS = Path(__file__).resolve().parents[2] / "claude-plugin" / "hooks"
+HOOKS = Path(__file__).resolve().parents[2] / "claude-plugin-hooks" / "hooks"
 SID = "abc-123"
 
 

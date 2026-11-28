@@ -2,7 +2,7 @@
 """Status line command: record model, effort, context use and cost, and print a compact line.
 
 The plugin does not set the status line, because that would replace one you already have (ADR 0016), so this is opt-in: put it in your own settings as
-  "statusLine": {"type": "command", "command": "python3 -I /path/to/claude-plugin/hooks/statusline.py"}
+  "statusLine": {"type": "command", "command": "python3 -I /path/to/claude-plugin-hooks/hooks/statusline.py"}
 It merges into the same per-session file as state_writer.py. Standard library only, never raises.
 """
 

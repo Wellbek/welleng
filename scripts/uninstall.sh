@@ -58,7 +58,9 @@ fi
 # 5. The command and the plugin.
 if command -v uv >/dev/null 2>&1 && uv tool list 2>/dev/null | grep -q '^welleng '; then act uv tool uninstall welleng; fi
 if command -v claude >/dev/null 2>&1; then
-  if claude plugin list 2>/dev/null | grep -q 'welleng@welleng-local'; then act claude plugin uninstall welleng@welleng-local; fi
+  for plugin in welleng-hooks@welleng-local welleng@welleng-local; do
+    if claude plugin list 2>/dev/null | grep -q "$plugin"; then act claude plugin uninstall "$plugin"; fi
+  done
   if claude plugin marketplace list 2>/dev/null | grep -q 'welleng-local'; then act claude plugin marketplace remove welleng-local; fi
 fi
 

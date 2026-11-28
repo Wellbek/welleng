@@ -1,4 +1,4 @@
-"""Control and review effort hints. The hook itself lives in claude-plugin/hooks/effort_hint.py.
+"""Control and review effort hints. The hook itself lives in claude-plugin-hooks/hooks/effort_hint.py.
 
 Both sides share two files in $XDG_STATE_HOME/welleng: hints.json (switches) and hints.log (events).
 """

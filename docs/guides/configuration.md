@@ -115,10 +115,11 @@ Windows only, opt in from your PowerShell 7 profile, see [Windows and WSL2](wind
 
 | File | Purpose | Activation |
 |---|---|---|
-| `claude-plugin/` | The `welleng` plugin: `/welleng:harness`, a session start suggestion, effort hints and the state writer | `claude plugin install`, see [Claude Code](claude-code.md#install-the-plugin) |
+| `claude-plugin/` | The `welleng` plugin: every `/welleng:` skill and the subagents, no hooks | `claude plugin install`, see [Claude Code](claude-code.md#install-the-plugins) |
+| `claude-plugin-hooks/` | The `welleng-hooks` plugin: a session start suggestion, effort hints and the state writer | `claude plugin install`, see [Claude Code](claude-code.md#install-the-plugins) |
 | `~/.config/welleng/claude/CLAUDE.md` | Global agent instructions | one `@~/.config/welleng/claude/CLAUDE.md` line in your own `~/.claude/CLAUDE.md` |
 | `~/.config/welleng/ecc-overrides.json` | Features of the `ecc` plugin that conflict with this project | `python3 scripts/apply-ecc-overrides.py`, preview with `--dry-run` |
-| `claude-plugin/hooks/statusline.py` | Status line that records model, effort, context and cost | add it to your own settings, see [Claude Code](claude-code.md#session-state-and-the-dashboard) |
+| `claude-plugin-hooks/hooks/statusline.py` | Status line that records model, effort, context and cost | add it to your own settings, see [Claude Code](claude-code.md#session-state-and-the-dashboard) |
 
 ## Environment variables
 

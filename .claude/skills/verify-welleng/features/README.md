@@ -7,7 +7,7 @@ Read the index before driving, then use the matching feature file as the recipe.
 
 - `claude` is signed in, and the `welleng@welleng-local` plugin is enabled and read from this repository.
   `welleng doctor --claude` shows the version sessions load.
-- The opt-in status line script from `claude-plugin/hooks/statusline.py` is configured in the user's settings.
+- The opt-in status line script from `claude-plugin-hooks/hooks/statusline.py` is configured in the user's settings.
 - Every live drive follows the Launch section of the skill's `SKILL.md`.
 
 ## Driving conventions

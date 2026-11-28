@@ -1,6 +1,6 @@
 {
   "name": "welleng",
-  "version": "0.3.0",
-  "description": "Well-Engineering: the /welleng:harness project setup skill, the /welleng:mode workflow layer with its skills and subagents, effort hints and session state hooks",
+  "version": "0.4.0",
+  "description": "Well-Engineering skills and subagents: /welleng:harness project setup and the /welleng:mode workflow layer, with no hooks",
   "author": { "name": "Well-Engineering" }
 }

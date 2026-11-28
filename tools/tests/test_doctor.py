@@ -56,7 +56,8 @@ LIST_JSON = """[
  {"id": "big@market", "version": "2.0.0", "enabled": true},
  {"id": "off@market", "version": "1.0.0", "enabled": false},
  {"id": "welleng@welleng-local", "version": "0.1.0", "enabled": true,
-  "readFromFolder": "/repo/claude-plugin", "folderVersion": "0.2.0"}
+  "readFromFolder": "/repo/claude-plugin", "folderVersion": "0.2.0"},
+ {"id": "welleng-hooks@welleng-local", "version": "0.1.0", "enabled": false}
 ]"""
 
 
@@ -72,7 +73,7 @@ def fake_claude(args):
 
 def test_plugins_report_the_loaded_version_and_the_cost():
     plugins = doctor.load_plugins(fake_claude)
-    assert [p.version for p in plugins] == ["2.0.0", "1.0.0", "0.2.0"]
+    assert [p.version for p in plugins] == ["2.0.0", "1.0.0", "0.2.0", "0.1.0"]
     text = doctor.render_plugins(plugins, "0.2.0")
     assert "enabled  big@market 2.0.0, ~44,834 always-on tokens" in text
     assert "disabled off@market 1.0.0" in text and "off@market 1.0.0," not in text
@@ -83,6 +84,11 @@ def test_plugins_report_the_loaded_version_and_the_cost():
 def test_plugins_advise_an_update_when_the_loaded_version_is_old():
     text = doctor.render_plugins(doctor.load_plugins(fake_claude), "0.3.0")
     assert "sessions load welleng@welleng-local 0.2.0 but the repository has 0.3.0" in text
+
+
+def test_plugins_advise_the_hooks_plugin_when_it_is_missing():
+    plugins = [p for p in doctor.load_plugins(fake_claude) if p.id != doctor.HOOKS_PLUGIN]
+    assert "welleng-hooks@welleng-local is not installed" in doctor.render_plugins(plugins, "0.2.0")
 
 
 def test_plugins_are_skipped_without_claude():

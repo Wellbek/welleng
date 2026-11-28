@@ -128,7 +128,7 @@ See [security](../security.md#setting-up-credentials) for the model.
 
 ## Install the Claude Code plugin
 
-See [Claude Code](claude-code.md#install-the-plugin).
+See [Claude Code](claude-code.md#install-the-plugins).
 
 ## Update
 

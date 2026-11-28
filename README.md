@@ -12,6 +12,7 @@ Not yet verified: native Windows, WSL2, macOS, phone access and the editor bridg
 
 The `welleng` plugin ships these skills.
 Type them as `/welleng:<name>`, they cost no context until used.
+The plugin has no hooks and needs nothing but Claude Code, so it can be installed without the rest of this repository, see [just the skills](#just-the-skills).
 
 | Skill | What it does |
 |---|---|
@@ -43,6 +44,28 @@ Type them as `/welleng:<name>`, they cost no context until used.
 This repository also has one project skill, `verify-welleng`, which drives a live Claude Code session to verify the plugin, its hooks and the CLI.
 See the [workflow guide](docs/guides/workflow.md) for how the skills fit together.
 
+## Just the skills
+
+To use the skills without the terminal setup, add this repository as a plugin marketplace and install only the `welleng` plugin.
+Nothing is cloned by hand, and nothing in your shell, tmux or editor changes.
+
+```sh
+claude plugin marketplace add Wellbek/welleng
+claude plugin install welleng@welleng-local
+```
+
+Inside a running session the same works as `/plugin marketplace add Wellbek/welleng` and `/plugin install welleng@welleng-local`, then restart the session.
+Update later with `claude plugin marketplace update welleng-local` and `claude plugin update welleng@welleng-local`.
+
+- Every skill except `/welleng:harness` works on its own.
+  `/welleng:harness` also needs the `welleng` command, install it with `uv tool install "git+https://github.com/Wellbek/welleng#subdirectory=tools"`.
+- `/welleng:show-me-your-work` runs a small helper with `python3`.
+- The hooks for effort hints and the session dashboard are a separate plugin, `welleng-hooks`, which only the full setup needs.
+- The repository must be readable for the person installing, a private repository needs their own GitHub access `[docs]`.
+
+Tested by installing from a local clone into an empty Claude Code config on WSL2 Ubuntu: 24 skills, 2 subagents and no hooks were loaded.
+Installing from GitHub by `owner/repo` has not been run.
+
 ## Quick start
 
 On Linux or inside WSL2.
@@ -57,8 +80,9 @@ uv tool install --editable tools      # the welleng command
 welleng doctor                        # what is installed and what is missing
 chezmoi init --apply --source .       # deploy the configuration, read `chezmoi diff` first
 scripts/wire-in.sh --dry-run          # optional: connect an existing zsh, tmux and SSH setup
-claude plugin marketplace add .       # optional: the Claude Code plugin
+claude plugin marketplace add .       # optional: the Claude Code plugins
 claude plugin install welleng@welleng-local
+claude plugin install welleng-hooks@welleng-local
 ```
 
 Credentials are all optional, see [configuration](docs/guides/configuration.md#credentials).
@@ -71,7 +95,7 @@ Credentials are all optional, see [configuration](docs/guides/configuration.md#c
 | Terminal | tmux owns the layout, kitty or WezTerm is only a skin, `welleng up` opens a project session |
 | Shell | zsh or PowerShell 7 with starship, fzf, ripgrep, fd, bat, zoxide, yazi, delta and lazygit |
 | Editor | Neovim with LazyVim and claudecode.nvim |
-| Claude Code | The plugin above, effort hints in the status line, and a tmux counter of sessions waiting for you |
+| Claude Code | The skills plugin above, a hooks plugin for effort hints and session state, and a tmux counter of sessions waiting for you |
 | Remote | OpenSSH config as the machine registry, Claude Code Remote Control for the phone |
 
 ## The `welleng` command

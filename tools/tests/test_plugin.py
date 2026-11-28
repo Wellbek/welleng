@@ -3,8 +3,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-PLUGIN = Path(__file__).resolve().parents[2] / "claude-plugin"
-HOOK = PLUGIN / "hooks" / "suggest_harness.py"
+ROOT = Path(__file__).resolve().parents[2]
+PLUGIN = ROOT / "claude-plugin"
+HOOKS_PLUGIN = ROOT / "claude-plugin-hooks"
+HOOK = HOOKS_PLUGIN / "hooks" / "suggest_harness.py"
 
 
 def run(event: dict | str) -> str:
@@ -41,8 +43,14 @@ def test_never_fails_on_garbage_input():
 def test_manifests_are_valid():
     manifest = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
     assert manifest["name"] == "welleng"
-    hooks = json.loads((PLUGIN / "hooks" / "hooks.json").read_text())
+    assert json.loads((HOOKS_PLUGIN / ".claude-plugin" / "plugin.json").read_text())["name"] == "welleng-hooks"
+    hooks = json.loads((HOOKS_PLUGIN / "hooks" / "hooks.json").read_text())
     assert "SessionStart" in hooks["hooks"]
+    marketplace = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
+    assert {p["name"]: p["source"] for p in marketplace["plugins"]} == {
+        "welleng": "./claude-plugin",
+        "welleng-hooks": "./claude-plugin-hooks",
+    }
     skill = (PLUGIN / "skills" / "harness" / "SKILL.md").read_text()
     assert skill.startswith("---\nname: harness\n")
 
@@ -68,3 +76,10 @@ def test_the_mode_skill_lists_every_playbook():
         assert f"`playbooks/{playbook.name}`" in text, playbook.name
     for principle in sorted((mode / "principles").glob("*.md")):
         assert f"`principles/{principle.name}`" in text, principle.name
+
+
+def test_the_skills_plugin_runs_nothing_on_its_own():
+    """The welleng plugin installs alone with nothing running automatically, see ADR 0022."""
+    assert not (PLUGIN / "hooks").exists()
+    manifest = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
+    assert not {"hooks", "mcpServers", "lspServers"} & manifest.keys()

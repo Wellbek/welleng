@@ -33,7 +33,7 @@ The plugin is installed from the local marketplace as `welleng@welleng-local`.
 1. In a throwaway repository run `claude`, send one short prompt, and let it finish.
 2. In another terminal run `welleng agents`.
    Expected: your session has a model, effort level and subagent count (`sub`) filled in, and `ls ~/.local/state/welleng/sessions/` shows one mode-600 file for it.
-3. Add the status line from the header of `claude-plugin/hooks/statusline.py` to a throwaway settings file, restart the session, send a prompt, and run `welleng agents` again.
+3. Add the status line from the header of `claude-plugin-hooks/hooks/statusline.py` to a throwaway settings file, restart the session, send a prompt, and run `welleng agents` again.
    Expected: the `ctx` and `cost` columns are filled in, and the status line shows model, effort, context and cost.
 4. Exit the session.
    Expected: its state file is gone.

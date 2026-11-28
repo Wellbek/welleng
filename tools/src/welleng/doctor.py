@@ -18,6 +18,7 @@ from pathlib import Path
 
 TIERS = ("mandatory", "recommended", "optional")
 WELLENG_PLUGIN = "welleng@welleng-local"
+HOOKS_PLUGIN = "welleng-hooks@welleng-local"
 ALWAYS_ON_RE = re.compile(r"Always-on:\s*~?([\d,]+)\s*tok")
 Runner = Callable[[list[str]], "str | None"]
 
@@ -128,4 +129,6 @@ def render_plugins(plugins: list[Plugin] | None, repo_version: str) -> str:
             f"  advice   sessions load {WELLENG_PLUGIN} {welleng.version} but the repository has {repo_version}, run"
             f" `claude plugin marketplace update welleng-local` and `claude plugin update {WELLENG_PLUGIN}`"
         )
+    if not any(p.id == HOOKS_PLUGIN for p in plugins):
+        lines.append(f"  advice   {HOOKS_PLUGIN} is not installed, effort hints and session state need it")
     return "\n".join(lines)

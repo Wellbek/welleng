@@ -52,7 +52,7 @@ Existing today:
 - `scripts/` repository hygiene, secret scanning, `install-gitleaks.sh`, `check-packages.py`, `init-secrets.sh`, `apply-ecc-overrides.py`, `check-skills.py`, `check-commit-msg.sh` and `pstack-upstream-diff.py`
 - `.githooks/` pre-commit and commit-msg gates
 - `packages/packages.toml` the package map, checked against pacman, apt and dnf in CI
-- `bootstrap/` installer and pinned releases, `claude-plugin/` the plugin with `/welleng:harness`, `/welleng:mode`, the workflow skills and the `worker` and `comment-reviewer` subagents, `tools/` the `welleng` Python package
+- `bootstrap/` installer and pinned releases, `claude-plugin/` the `welleng` plugin with `/welleng:harness`, `/welleng:mode`, the workflow skills and the `worker` and `comment-reviewer` subagents and no hooks, `claude-plugin-hooks/` the `welleng-hooks` plugin with every hook and the status line script, `tools/` the `welleng` Python package
 - `.chezmoiroot` and `home/` the chezmoi source state: tmux and git config, the tpm external, `dot_config/welleng/` (credentials example, shell helpers, starship, lazygit, kitty, yazi, global Claude instructions, tmux segment, `ecc` overrides), `dot_config/welleng-nvim/`, and the Windows-only `Documents/PowerShell/` and `dot_config/wezterm/`
 - `scripts/wire-in.sh`, `scripts/uninstall.sh`, `docs/verification/` and `docs/troubleshooting.md`
 - `.claude/skills/verify-welleng/` the project verification skill, which drives a live Claude Code session on a private tmux server

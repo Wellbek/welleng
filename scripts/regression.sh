@@ -70,6 +70,8 @@ stage_python() {
 stage_plugin() {
   need claude || return 77
   claude plugin validate claude-plugin
+  claude plugin validate claude-plugin-hooks
+  claude plugin validate .
 }
 stage_packages() { python3 -I -c "import tomllib,sys; d=tomllib.load(open('packages/packages.toml','rb')); sys.exit(0 if d['package'] else 1)"; }
 stage_e2e() {

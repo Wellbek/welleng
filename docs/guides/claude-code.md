@@ -8,29 +8,37 @@ The `/welleng:mode` skill and the `welleng:worker` subagent ran headless on 2.1.
 The `/welleng:harness` questionnaire ran in a live interactive session on 2.1.328 on Arch.
 The editor bridge has not been verified interactively, see [docs/verification/interactive.md](../verification/interactive.md).
 
-## Install the plugin
+## Install the plugins
 
-The repository is also a plugin marketplace named `welleng-local`.
+The repository is also a plugin marketplace named `welleng-local` with two plugins, see [ADR 0022](../adr/0022-skills-plugin-without-hooks.md).
+
+| Plugin | Contents | Needs |
+|---|---|---|
+| `welleng` | All `/welleng:` skills and the two subagents, no hooks | Claude Code only, plus the `welleng` command for `/welleng:harness` |
+| `welleng-hooks` | Every hook and the status line script | `python3`, and the full setup to be useful |
 
 ```sh
-claude plugin marketplace add <path to the repository>
+claude plugin marketplace add <path to the repository>   # or Wellbek/welleng without a clone
 claude plugin install welleng@welleng-local
+claude plugin install welleng-hooks@welleng-local          # full setup only
 claude plugin list
 ```
 
-The `/welleng:harness` skill needs the `welleng` command on `PATH`, see [installation](installation.md#3-install-the-welleng-command).
-Validate the plugin yourself with `claude plugin validate claude-plugin`.
+Someone who only wants the skills installs `welleng` and skips `welleng-hooks`, see [just the skills](../../README.md#just-the-skills).
 
-The plugin contains:
+The `/welleng:harness` skill needs the `welleng` command on `PATH`, see [installation](installation.md#3-install-the-welleng-command).
+Validate them yourself with `claude plugin validate claude-plugin` and `claude plugin validate claude-plugin-hooks`.
+
+The two plugins contain:
 
 | Part | What it does |
 |---|---|
-| `/welleng:harness` skill | Questionnaire that sets up a project's Claude Code configuration |
-| `/welleng:mode` and the workflow skills | Playbooks, principles and subagent roles for rigorous engineering work, see [the workflow guide](workflow.md) |
-| `welleng:worker` and `welleng:comment-reviewer` subagents | Delegates that carry the Well-Engineering rules, used by the workflow skills |
-| `SessionStart` hook | Suggests `/welleng:harness` once in a git repository that has no `CLAUDE.md` and no `.claude/settings.json` |
-| `UserPromptSubmit` hook | Effort hints |
-| State writer hooks | Record per-session model, effort and subagents for the dashboard |
+| `/welleng:harness` skill, in `welleng` | Questionnaire that sets up a project's Claude Code configuration |
+| `/welleng:mode` and the workflow skills, in `welleng` | Playbooks, principles and subagent roles for rigorous engineering work, see [the workflow guide](workflow.md) |
+| `welleng:worker` and `welleng:comment-reviewer` subagents, in `welleng` | Delegates that carry the Well-Engineering rules, used by the workflow skills |
+| `SessionStart` hook, in `welleng-hooks` | Suggests `/welleng:harness` once in a git repository that has no `CLAUDE.md` and no `.claude/settings.json` |
+| `UserPromptSubmit` hook, in `welleng-hooks` | Effort hints |
+| State writer hooks, in `welleng-hooks` | Record per-session model, effort and subagents for the dashboard |
 
 All hooks print nothing except one JSON object when they have something to say, and never raise, so they cannot disturb a session.
 Each runs as a direct `python3 -I` call, not through your shell.
@@ -107,7 +115,7 @@ Context use and cost come only from the status line, which the plugin does not s
 To opt in, put this in your own Claude Code settings, with the real path:
 
 ```json
-"statusLine": {"type": "command", "command": "python3 -I /path/to/welleng/claude-plugin/hooks/statusline.py"}
+"statusLine": {"type": "command", "command": "python3 -I /path/to/welleng/claude-plugin-hooks/hooks/statusline.py"}
 ```
 
 It prints a compact line such as `model | high | ctx 42% | $1.23` and records the same values.
