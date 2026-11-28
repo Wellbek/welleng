@@ -113,14 +113,16 @@ The claudecode.nvim bridge starts a WebSocket server inside Neovim `[verified: A
 
 Acceptance test 9b therefore filters by process, so that the Neovim listener is not mistaken for a Remote Control listener.
 
-### Optional: Tailscale, SSH and tmux
+### Optional: Tailscale SSH and tmux
 
-For attaching to real tmux panes from a phone SSH client.
+For attaching to real tmux panes from a phone SSH client, see ADR 0023 and `scripts/phone-ssh.sh`.
 It is off by default because it duplicates Remote Control for most uses.
 
-- No public ports: the machine joins a tailnet and SSH is reachable only on that network.
-- Authentication is Tailscale device identity plus SSH keys, with password login disabled.
+- No public ports: the machine joins a tailnet and Tailscale SSH answers only on that network `[docs]`.
+- No OpenSSH server runs, and no SSH key or password is used.
+- Authentication is the Tailscale account and the tailnet policy, which by default asks for a new sign-in every 12 hours `[docs]`.
 - Traffic is encrypted by WireGuard.
+- Whoever controls the Tailscale account can open a shell while it is on, so protect that account with strong sign-in, and switch it off with `scripts/phone-ssh.sh off --yes`.
 
 ### Rejected
 
@@ -136,7 +138,7 @@ They create a standing internet-facing shell, which this project does not accept
 | Who can reach a session? | Only the account signed in to Claude on both ends |
 | What if the phone is lost? | Revoke the session from claude.ai and sign the phone out, no local rotation needed |
 | What can the phone do? | Whatever the session's permission mode allows, so the default mode keeps approvals interactive |
-| What is not covered? | Plain terminal access, Neovim and other tools, which stay local |
+| What is not covered? | Plain terminal access, Neovim and other tools, which stay local unless the optional Tailscale SSH route is on |
 | What does the transcript leak? | Messages, responses and tool activity are stored by Anthropic while connected `[docs]` |
 
 ## Limits

@@ -12,7 +12,7 @@ Anything verified only on the maintainer's Arch Linux machine is labelled as suc
 | [Claude Code](claude-code.md) | Use the plugin, the `/welleng:harness` skill, the agents dashboard, effort hints and the editor bridge |
 | [Workflow](workflow.md) | Use `/welleng:mode`, its playbooks and the standalone workflow skills |
 | [Terminal, shell and editor](terminal-and-editor.md) | Learn the tmux, Neovim, git, kitty, yazi and shell setup and its keys |
-| [Remote machines and mobile](remote-and-mobile.md) | Manage SSH hosts and run Remote Control from a phone safely |
+| [Remote machines and mobile](remote-and-mobile.md) | Manage SSH hosts, and work from an iPhone or Android phone with Remote Control or Tailscale SSH |
 | [Windows and WSL2](windows.md) | Use the Windows paths, which are not verified yet |
 
 For the reasons behind the design, read the [decision records](../adr/README.md).

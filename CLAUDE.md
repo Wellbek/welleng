@@ -49,7 +49,7 @@ Read `README.md` for the architecture and `docs/adr/` for the reasons behind eac
 Existing today:
 
 - `docs/adr/` decision records, `docs/security.md`, `docs/platforms.md`
-- `scripts/` repository hygiene, secret scanning, `install-gitleaks.sh`, `check-packages.py`, `init-secrets.sh`, `apply-ecc-overrides.py`, `check-skills.py`, `check-commit-msg.sh` and `pstack-upstream-diff.py`
+- `scripts/` repository hygiene, secret scanning, `install-gitleaks.sh`, `check-packages.py`, `init-secrets.sh`, `phone-ssh.sh`, `apply-ecc-overrides.py`, `check-skills.py`, `check-commit-msg.sh` and `pstack-upstream-diff.py`
 - `.githooks/` pre-commit and commit-msg gates
 - `packages/packages.toml` the package map, checked against pacman, apt and dnf in CI
 - `bootstrap/` installer and pinned releases, `claude-plugin/` the `welleng` plugin with `/welleng:harness`, `/welleng:mode`, the workflow skills and the `worker` and `comment-reviewer` subagents and no hooks, `claude-plugin-hooks/` the `welleng-hooks` plugin with every hook and the status line script, `tools/` the `welleng` Python package

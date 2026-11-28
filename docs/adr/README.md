@@ -39,3 +39,4 @@ Claims in these records carry one of these tags so the strength of the evidence 
 | [0020](0020-workflow-layer-adapted-from-pstack.md) | Workflow layer adapted from pstack | Accepted |
 | [0021](0021-effort-level-from-the-status-line-state.md) | The effort level for hints comes from the status line state | Accepted |
 | [0022](0022-skills-plugin-without-hooks.md) | The skills plugin carries no hooks | Accepted |
+| [0023](0023-tailscale-ssh-for-phone-terminal-access.md) | Tailscale SSH for terminal access from a phone | Accepted |

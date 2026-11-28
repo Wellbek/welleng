@@ -123,7 +123,7 @@ welleng hints report
 
 ## `welleng rc`
 
-Starts Remote Control, or checks the listening ports around it, see [remote machines](remote-and-mobile.md#remote-control-from-a-phone).
+Starts Remote Control, or checks the listening ports around it, see [remote machines](remote-and-mobile.md#a-remote-control).
 
 ```sh
 welleng rc [--name NAME]

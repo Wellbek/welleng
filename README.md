@@ -96,7 +96,7 @@ Credentials are all optional, see [configuration](docs/guides/configuration.md#c
 | Shell | zsh or PowerShell 7 with starship, fzf, ripgrep, fd, bat, zoxide, yazi, delta and lazygit |
 | Editor | Neovim with LazyVim and claudecode.nvim |
 | Claude Code | The skills plugin above, a hooks plugin for effort hints and session state, and a tmux counter of sessions waiting for you |
-| Remote | OpenSSH config as the machine registry, Claude Code Remote Control for the phone |
+| Remote | OpenSSH config as the machine registry, Claude Code Remote Control for the phone, optional Tailscale SSH into tmux, see [working from a phone](docs/guides/remote-and-mobile.md#working-from-a-phone) |
 
 ## The `welleng` command
 
